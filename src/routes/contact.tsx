@@ -85,9 +85,9 @@ function Contact() {
 
       {/* CONTACT SPLIT */}
       <section className="section">
-        <div className="container-x grid gap-10 lg:grid-cols-[1.4fr_1fr] ">
+        <div className="container-x grid gap-10 lg:grid-cols-[1.4fr_1fr]">
           {/* FORM */}
-          <div className="rounded-3xl bg-card border border-border sm:p-6 md:p-10">
+          <div className="rounded-3xl bg-card border border-border  md:p-10">
             {sent ? (
               <div className="text-center py-16">
                 <div className="w-16 h-16 mx-auto rounded-full bg-primary/15 text-primary grid place-items-center">
