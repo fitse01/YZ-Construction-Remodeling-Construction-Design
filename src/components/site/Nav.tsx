@@ -25,7 +25,7 @@ export function Nav() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-100 transition-all duration-300 ${
         scrolled ? "bg-background/85 backdrop-blur-md border-b border-border" : "bg-transparent"
       }`}
     >
@@ -68,7 +68,7 @@ export function Nav() {
         </div>
 
         <button
-          className="lg:hidden p-2 -mr-2 text-foreground"
+          className="lg:hidden relative z-101 p-2 -mr-2 text-foreground touch-manipulation"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -77,7 +77,7 @@ export function Nav() {
       </div>
 
       {open && (
-        <div className="lg:hidden border-t border-border bg-background animate-fade-in">
+        <div className="lg:hidden relative z-100 border-t border-border bg-background animate-fade-in">
           <div className="container-x py-4 flex flex-col gap-1">
             {links.map((l) => (
               <Link

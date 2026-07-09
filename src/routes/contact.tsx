@@ -85,9 +85,9 @@ function Contact() {
 
       {/* CONTACT SPLIT */}
       <section className="section">
-        <div className="container-x grid gap-10 lg:grid-cols-[1.4fr_1fr]">
+        <div className="container-x grid items-start gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           {/* FORM */}
-          <div className="rounded-3xl bg-card border border-border  md:p-10">
+          <div className="min-w-0 rounded-3xl bg-card border border-border p-5 sm:p-6 md:p-10">
             {sent ? (
               <div className="text-center py-16">
                 <div className="w-16 h-16 mx-auto rounded-full bg-primary/15 text-primary grid place-items-center">
@@ -100,10 +100,10 @@ function Contact() {
                 </p>
               </div>
             ) : (
-              <form onSubmit={submit} className="grid gap-5">
+              <form onSubmit={submit} className="grid min-w-0 gap-5">
                 <h2 className="text-2xl font-display font-bold">Request a free estimate</h2>
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <Field label="Name" name="name" error={errors.name} />
                   <Field label="Email" name="email" type="email" error={errors.email} />
                   <Field label="Phone" name="phone" type="tel" error={errors.phone} />
@@ -140,16 +140,19 @@ function Contact() {
                   )}
                 </div>
 
-                <label className="flex items-center gap-3 rounded-xl border border-dashed border-border p-4 cursor-pointer hover:border-primary transition">
+                <label className="flex cursor-pointer flex-col items-start gap-3 rounded-xl border border-dashed border-border p-4 transition hover:border-primary sm:flex-row sm:items-center">
                   <Upload className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-sm">
+                  <span className="min-w-0 text-sm">
                     <span className="font-medium">Upload project images</span>{" "}
                     <span className="text-muted-foreground">(optional · up to 10)</span>
                   </span>
                   <input type="file" multiple accept="image/*" className="hidden" />
                 </label>
 
-                <button type="submit" className="btn-primary mt-2 justify-self-start">
+                <button
+                  type="submit"
+                  className="btn-primary mt-2 w-full justify-self-start sm:w-auto"
+                >
                   Send Estimate Request
                 </button>
                 <p className="text-xs text-muted-foreground">
@@ -161,14 +164,14 @@ function Contact() {
           </div>
 
           {/* SIDE INFO */}
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <InfoCard
               icon={Phone}
               title="Call us"
               primary="(240) 781-8778"
               secondary="Mon–Fri 8am–6pm ET · Sat 9am–1pm"
             >
-              <a href="tel:+12407818778" className="btn-primary mt-4 !py-2.5">
+              <a href="tel:+12407818778" className="btn-primary mt-4 w-full py-2.5! sm:w-auto">
                 Call Now
               </a>
             </InfoCard>
@@ -179,7 +182,10 @@ function Contact() {
               primary="yohanneszewdebayu@gmail.com"
               secondary="We reply within one business day"
             >
-              <a href="mailto:yohanneszewdebayu@gmail.com" className="btn-outline mt-4 !py-2.5">
+              <a
+                href="mailto:yohanneszewdebayu@gmail.com"
+                className="btn-outline mt-4 w-full py-2.5! sm:w-auto"
+              >
                 Send Email
               </a>
             </InfoCard>
@@ -190,7 +196,10 @@ function Contact() {
               primary="Chat with us"
               secondary="Fastest for photo/video questions"
             >
-              <a href="https://wa.me/12407818778" className="btn-outline mt-4 !py-2.5">
+              <a
+                href="https://wa.me/12407818778"
+                className="btn-outline mt-4 w-full py-2.5! sm:w-auto"
+              >
                 Open WhatsApp
               </a>
             </InfoCard>
@@ -273,7 +282,7 @@ function Contact() {
         </div>
 
         <div className="container-x mt-14">
-          <div className="rounded-3xl overflow-hidden border border-border aspect-[16/7]">
+          <div className="rounded-3xl overflow-hidden border border-border aspect-16/7">
             <iframe
               title="YZ Construction service map"
               src="https://www.openstreetmap.org/export/embed.html?bbox=-77.35,38.85,-76.85,39.15&layer=mapnik&marker=39.0028,-77.0207"
@@ -367,7 +376,9 @@ function InfoCard({
           <div className="text-xs font-mono tracking-[0.22em] uppercase text-muted-foreground">
             {title}
           </div>
-          <div className="font-display font-semibold text-lg mt-0.5">{primary}</div>
+          <div className="font-display font-semibold max-sm:text-[12px] md:text-lg mt-0.5">
+            {primary}
+          </div>
         </div>
       </div>
       <p className="mt-3 text-sm text-muted-foreground">{secondary}</p>
