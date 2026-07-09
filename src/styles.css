@@ -1,0 +1,222 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Grotesk", ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-glow: var(--primary-glow);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ink: var(--ink);
+  --color-concrete: var(--concrete);
+  --color-surface: var(--surface);
+}
+
+:root {
+  --radius: 0.5rem;
+
+  /* Brand: YZ Construction — Modern Craftsman */
+  --background: oklch(0.972 0.005 90);        /* #F7F6F3 warm off-white */
+  --foreground: oklch(0.22 0.008 150);        /* #1C1F1D charcoal */
+  --ink: oklch(0.22 0.008 150);
+  --surface: oklch(1 0 0);                    /* pure white cards */
+  --concrete: oklch(0.65 0.012 145);          /* #8A8F87 */
+
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.52 0.14 145);            /* #2E7D32 brand green */
+  --primary-foreground: oklch(0.98 0.005 90);
+  --primary-glow: oklch(0.65 0.17 145);       /* #4CAF50 accent green */
+
+  --secondary: oklch(0.94 0.005 90);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.94 0.006 100);
+  --muted-foreground: oklch(0.5 0.01 145);
+  --accent: oklch(0.65 0.17 145);
+  --accent-foreground: oklch(0.98 0.005 90);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.9 0.005 100);
+  --input: oklch(0.9 0.005 100);
+  --ring: oklch(0.52 0.14 145);
+}
+
+.dark {
+  --background: oklch(0.19 0.006 180);        /* #14181A */
+  --foreground: oklch(0.96 0.003 90);         /* #F2F2F0 */
+  --ink: oklch(0.96 0.003 90);
+  --surface: oklch(0.25 0.008 165);           /* #1F2523 */
+  --concrete: oklch(0.62 0.01 145);
+
+  --card: oklch(0.25 0.008 165);
+  --card-foreground: oklch(0.96 0.003 90);
+  --popover: oklch(0.25 0.008 165);
+  --popover-foreground: oklch(0.96 0.003 90);
+
+  --primary: oklch(0.65 0.17 145);
+  --primary-foreground: oklch(0.15 0.005 180);
+  --primary-glow: oklch(0.72 0.18 145);
+
+  --secondary: oklch(0.3 0.008 165);
+  --secondary-foreground: oklch(0.96 0.003 90);
+  --muted: oklch(0.3 0.008 165);
+  --muted-foreground: oklch(0.72 0.01 145);
+  --accent: oklch(0.65 0.17 145);
+  --accent-foreground: oklch(0.15 0.005 180);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.65 0.17 145);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .font-num {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+  }
+}
+
+@utility container-x {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  max-width: 80rem;
+  @media (min-width: 768px) { padding-inline: 2rem; }
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 20px -8px color-mix(in oklab, var(--color-primary) 60%, transparent);
+  &:hover {
+    background: var(--color-primary-glow);
+    transform: translateY(-1px);
+  }
+}
+
+@utility btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid color-mix(in oklab, var(--color-foreground) 20%, transparent);
+  color: var(--color-foreground);
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: transparent;
+  transition: all 0.2s ease;
+  &:hover {
+    border-color: var(--color-foreground);
+    background: color-mix(in oklab, var(--color-foreground) 4%, transparent);
+  }
+}
+
+@utility btn-ghost-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+  &:hover {
+    background: rgba(255,255,255,0.14);
+  }
+}
+
+@utility eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  font-weight: 600;
+  &::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: var(--color-primary);
+  }
+}
+
+@utility card-lift {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 40px -24px color-mix(in oklab, var(--color-foreground) 30%, transparent);
+  }
+}
+
+@utility section {
+  padding-block: 5rem;
+  @media (min-width: 768px) { padding-block: 7rem; }
+}
