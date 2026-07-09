@@ -245,7 +245,7 @@ function Testimonials() {
                 Case studies, budget guides, and design ideas. No spam.
               </p>
             </div>
-            <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex max-sm:flex-col gap-2" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="email"
                 required
