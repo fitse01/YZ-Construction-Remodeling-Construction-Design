@@ -16,11 +16,11 @@ import { SiteLayout, PageHero } from "@/components/site/Layout";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact & Free Estimate — YZ Construction, Silver Spring MD" },
+      { title: "Contact & Free Estimate  YZ Construction, Silver Spring MD" },
       {
         name: "description",
         content:
-          "Get a free on-site estimate from YZ Construction. Serving Silver Spring, MD and the wider DMV — Maryland, Washington DC, and Northern Virginia.",
+          "Get a free on-site estimate from YZ Construction. Serving Silver Spring, MD and the wider DMV  Maryland, Washington DC, and Northern Virginia.",
       },
       { property: "og:title", content: "Contact YZ Construction" },
       {
@@ -80,7 +80,7 @@ function Contact() {
       <PageHero
         eyebrow="Contact & free estimate"
         title="Tell us about your project. We'll take it from there."
-        description="Free on-site consultation. A real person replies within one business day — usually much sooner."
+        description="Free on-site consultation. A real person replies within one business day  usually much sooner."
       />
 
       {/* CONTACT SPLIT */}
@@ -93,10 +93,10 @@ function Contact() {
                 <div className="w-16 h-16 mx-auto rounded-full bg-primary/15 text-primary grid place-items-center">
                   <Check className="w-7 h-7" />
                 </div>
-                <h2 className="mt-6 text-3xl font-display font-bold">Thanks — we got it.</h2>
+                <h2 className="mt-6 text-3xl font-display font-bold">Thanks we got it.</h2>
                 <p className="mt-3 text-muted-foreground max-w-md mx-auto">
                   We'll reach out within one business day to schedule your free on-site estimate. If
-                  it's urgent, call us at (555) 123-4567.
+                  it's urgent, call us at (240) 781-8778.
                 </p>
               </div>
             ) : (
@@ -165,10 +165,10 @@ function Contact() {
             <InfoCard
               icon={Phone}
               title="Call us"
-              primary="(555) 123-4567"
+              primary="(240) 781-8778"
               secondary="Mon–Fri 8am–6pm ET · Sat 9am–1pm"
             >
-              <a href="tel:+15551234567" className="btn-primary mt-4 !py-2.5">
+              <a href="tel:+12407818778" className="btn-primary mt-4 !py-2.5">
                 Call Now
               </a>
             </InfoCard>
@@ -176,10 +176,10 @@ function Contact() {
             <InfoCard
               icon={Mail}
               title="Email"
-              primary="info@yzconstruction.com"
+              primary="yohanneszewdebayu@gmail.com"
               secondary="We reply within one business day"
             >
-              <a href="mailto:info@yzconstruction.com" className="btn-outline mt-4 !py-2.5">
+              <a href="mailto:yohanneszewdebayu@gmail.com" className="btn-outline mt-4 !py-2.5">
                 Send Email
               </a>
             </InfoCard>
@@ -190,7 +190,7 @@ function Contact() {
               primary="Chat with us"
               secondary="Fastest for photo/video questions"
             >
-              <a href="https://wa.me/15551234567" className="btn-outline mt-4 !py-2.5">
+              <a href="https://wa.me/12407818778" className="btn-outline mt-4 !py-2.5">
                 Open WhatsApp
               </a>
             </InfoCard>
@@ -201,8 +201,8 @@ function Contact() {
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
                 Storm damage or urgent structural issue? Call us anytime at{" "}
-                <a href="tel:+15559998888" className="font-semibold text-foreground underline">
-                  (555) 999-8888
+                <a href="tel:+12407818778" className="font-semibold text-foreground underline">
+                  (240) 781-8778
                 </a>
                 .
               </p>
@@ -221,9 +221,9 @@ function Contact() {
             </div>
             <h3 className="mt-3 text-2xl font-display font-semibold">YZ Construction, LLC</h3>
             <p className="mt-2 text-muted-foreground">
-              Silver Spring, MD 20910
+              Silver Spring, MD 20906
               <br />
-              Serving the DMV — MD · DC · VA
+              Serving the DMV MD · DC · VA
             </p>
           </div>
           <div>

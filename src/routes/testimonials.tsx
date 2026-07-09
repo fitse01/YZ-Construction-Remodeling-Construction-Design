@@ -10,13 +10,13 @@ import interior from "@/assets/interior.jpg";
 export const Route = createFileRoute("/testimonials")({
   head: () => ({
     meta: [
-      { title: "Testimonials, Reviews & Blog — YZ Construction" },
+      { title: "Testimonials, Reviews & Blog  YZ Construction" },
       {
         name: "description",
         content:
           "Read verified customer reviews, watch video testimonials, and browse our latest renovation tips and case studies from projects across the DMV.",
       },
-      { property: "og:title", content: "Testimonials & Blog — YZ Construction" },
+      { property: "og:title", content: "Testimonials & Blog  YZ Construction" },
       {
         property: "og:description",
         content: "Client stories, video reviews, and renovation guides.",

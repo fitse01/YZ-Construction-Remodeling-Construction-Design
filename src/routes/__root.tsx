@@ -71,7 +71,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "YZ Construction, LLC — Remodeling & Construction in the DMV" },
+      { title: "YZ Construction, LLC  Remodeling & Construction in the DMV" },
       {
         name: "description",
         content:
@@ -79,11 +79,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "YZ Construction, LLC" },
       { property: "og:site_name", content: "YZ Construction, LLC" },
-      { property: "og:title", content: "YZ Construction — Building Better Spaces" },
+      { property: "og:title", content: "YZ Construction  Building Better Spaces" },
       {
         property: "og:description",
         content:
-          "Boutique remodeling and construction serving the DMV. Kitchens, baths, restaurants and commercial builds — done right.",
+          "Boutique remodeling and construction serving the DMV. Kitchens, baths, restaurants and commercial builds  done right.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

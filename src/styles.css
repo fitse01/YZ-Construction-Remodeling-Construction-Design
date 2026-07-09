@@ -44,21 +44,21 @@
 :root {
   --radius: 0.5rem;
 
-  /* Brand: YZ Construction — Modern Craftsman */
-  --background: oklch(0.972 0.005 90);        /* #F7F6F3 warm off-white */
-  --foreground: oklch(0.22 0.008 150);        /* #1C1F1D charcoal */
+  /* Brand: YZ Construction  Modern Craftsman */
+  --background: oklch(0.972 0.005 90); /* #F7F6F3 warm off-white */
+  --foreground: oklch(0.22 0.008 150); /* #1C1F1D charcoal */
   --ink: oklch(0.22 0.008 150);
-  --surface: oklch(1 0 0);                    /* pure white cards */
-  --concrete: oklch(0.65 0.012 145);          /* #8A8F87 */
+  --surface: oklch(1 0 0); /* pure white cards */
+  --concrete: oklch(0.65 0.012 145); /* #8A8F87 */
 
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(0.52 0.14 145);            /* #2E7D32 brand green */
+  --primary: oklch(0.52 0.14 145); /* #2E7D32 brand green */
   --primary-foreground: oklch(0.98 0.005 90);
-  --primary-glow: oklch(0.65 0.17 145);       /* #4CAF50 accent green */
+  --primary-glow: oklch(0.65 0.17 145); /* #4CAF50 accent green */
 
   --secondary: oklch(0.94 0.005 90);
   --secondary-foreground: var(--foreground);
@@ -74,10 +74,10 @@
 }
 
 .dark {
-  --background: oklch(0.19 0.006 180);        /* #14181A */
-  --foreground: oklch(0.96 0.003 90);         /* #F2F2F0 */
+  --background: oklch(0.19 0.006 180); /* #14181A */
+  --foreground: oklch(0.96 0.003 90); /* #F2F2F0 */
   --ink: oklch(0.96 0.003 90);
-  --surface: oklch(0.25 0.008 165);           /* #1F2523 */
+  --surface: oklch(0.25 0.008 165); /* #1F2523 */
   --concrete: oklch(0.62 0.01 145);
 
   --card: oklch(0.25 0.008 165);
@@ -114,7 +114,11 @@
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, h5 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
     font-weight: 700;
@@ -130,7 +134,9 @@
   margin-inline: auto;
   padding-inline: 1.25rem;
   max-width: 80rem;
-  @media (min-width: 768px) { padding-inline: 2rem; }
+  @media (min-width: 768px) {
+    padding-inline: 2rem;
+  }
 }
 
 @utility btn-primary {
@@ -144,7 +150,10 @@
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
   box-shadow: 0 6px 20px -8px color-mix(in oklab, var(--color-primary) 60%, transparent);
   &:hover {
     background: var(--color-primary-glow);
@@ -176,17 +185,17 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 1px solid rgba(255,255,255,0.35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: #fff;
   padding: 0.85rem 1.5rem;
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.95rem;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(6px);
   transition: all 0.2s ease;
   &:hover {
-    background: rgba(255,255,255,0.14);
+    background: rgba(255, 255, 255, 0.14);
   }
 }
 
@@ -209,7 +218,9 @@
 }
 
 @utility card-lift {
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 22px 40px -24px color-mix(in oklab, var(--color-foreground) 30%, transparent);
@@ -218,5 +229,7 @@
 
 @utility section {
   padding-block: 5rem;
-  @media (min-width: 768px) { padding-block: 7rem; }
+  @media (min-width: 768px) {
+    padding-block: 7rem;
+  }
 }

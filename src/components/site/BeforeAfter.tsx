@@ -23,21 +23,25 @@ export function BeforeAfter({ before, after, alt = "Before and after" }: Props) 
     <div
       ref={ref}
       className="relative w-full aspect-[4/3] md:aspect-[16/10] overflow-hidden rounded-2xl select-none cursor-ew-resize bg-muted"
-      onMouseDown={(e) => { dragging.current = true; move(e.clientX); }}
+      onMouseDown={(e) => {
+        dragging.current = true;
+        move(e.clientX);
+      }}
       onMouseMove={(e) => dragging.current && move(e.clientX)}
       onMouseUp={() => (dragging.current = false)}
       onMouseLeave={() => (dragging.current = false)}
       onTouchStart={(e) => move(e.touches[0].clientX)}
       onTouchMove={(e) => move(e.touches[0].clientX)}
     >
-      <img src={after} alt={`${alt} — after`} className="absolute inset-0 w-full h-full object-cover" />
-      <div
-        className="absolute inset-0 overflow-hidden"
-        style={{ width: `${pos}%` }}
-      >
+      <img
+        src={after}
+        alt={`${alt}  after`}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
         <img
           src={before}
-          alt={`${alt} — before`}
+          alt={`${alt}  before`}
           className="absolute inset-0 h-full object-cover"
           style={{ width: `${(100 / pos) * 100}%`, maxWidth: "none" }}
         />

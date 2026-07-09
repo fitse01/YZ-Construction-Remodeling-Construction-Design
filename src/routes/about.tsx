@@ -8,11 +8,11 @@ import team from "@/assets/team.jpg";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About YZ Construction — DMV Family-Owned Contractor" },
+      { title: "About YZ Construction  DMV Family-Owned Contractor" },
       {
         name: "description",
         content:
-          "Meet John Zewde and the YZ Construction team — a family-owned design-build shop serving Maryland, DC and Virginia with over a decade of remodeling expertise.",
+          "Meet John Zewde and the YZ Construction team  a family-owned design-build shop serving Maryland, DC and Virginia with over a decade of remodeling expertise.",
       },
       { property: "og:title", content: "About YZ Construction" },
       { property: "og:description", content: "Family-owned design-build serving the DMV." },
@@ -54,7 +54,7 @@ function About() {
               <p>
                 John started YZ Construction with a pickup truck, a set of tools, and a stubborn
                 belief that renovations don't have to be a nightmare. Twelve years later, the trucks
-                are newer and the projects are bigger — but the standard is the same.
+                are newer and the projects are bigger but the standard is the same.
               </p>
               <p>
                 We stay intentionally small. Every project gets a dedicated project manager,
@@ -75,7 +75,7 @@ function About() {
             },
             {
               t: "Vision",
-              d: "Be the DMV's most trusted boutique builder — the shop people call when it has to be done right.",
+              d: "Be the DMV's most trusted boutique builder  the shop people call when it has to be done right.",
             },
             {
               t: "Values",

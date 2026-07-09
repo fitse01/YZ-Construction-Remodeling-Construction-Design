@@ -31,13 +31,13 @@ import after from "@/assets/after.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "YZ Construction — Remodeling & Construction in Silver Spring, MD" },
+      { title: "YZ Construction  Remodeling & Construction in Silver Spring, MD" },
       {
         name: "description",
         content:
           "Boutique remodeling and construction serving MD, DC & VA. Kitchens, bathrooms, whole-home renovations, restaurants and commercial builds licensed and insured.",
       },
-      { property: "og:title", content: "YZ Construction — Building Better Spaces" },
+      { property: "og:title", content: "YZ Construction  Building Better Spaces" },
       {
         property: "og:description",
         content: "Kitchen, bath, whole-home, restaurant and commercial renovation in the DMV.",
@@ -59,7 +59,7 @@ const services = [
   {
     icon: Hammer,
     title: "Kitchen Remodeling",
-    desc: "Custom cabinetry, stone, lighting — the heart of the home.",
+    desc: "Custom cabinetry, stone, lighting  the heart of the home.",
     img: kitchen,
   },
   {
@@ -77,7 +77,7 @@ const services = [
   {
     icon: Building2,
     title: "Commercial Build-Out",
-    desc: "Offices, retail, and mixed-use — turnkey delivery.",
+    desc: "Offices, retail, and mixed-use  turnkey delivery.",
     img: commercial,
   },
   {
@@ -114,8 +114,8 @@ function Home() {
             </h1>
             <p className="mt-6 max-w-xl text-lg text-white/80 leading-relaxed">
               A boutique design-build studio delivering premium residential and commercial
-              construction across Maryland, DC, and Virginia — with the craft, care, and
-              communication a big project deserves.
+              construction across Maryland, DC, and Virginia with the craft, care, and communication
+              a big project deserves.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link to="/contact" className="btn-primary">
@@ -161,7 +161,7 @@ function Home() {
             <p>
               Founded by John Zewde in Silver Spring, YZ Construction has spent over a decade
               renovating homes, restaurants, and commercial spaces across the DMV. We're small
-              enough to care about every detail — and structured enough to deliver on time and on
+              enough to care about every detail and structured enough to deliver on time and on
               budget.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4 border-t border-border">
@@ -209,7 +209,7 @@ function Home() {
               {
                 icon: Users,
                 t: "In-House Crews",
-                d: "Our tradespeople — not subs you'll never meet again.",
+                d: "Our tradespeople  not subs you'll never meet again.",
               },
               {
                 icon: Clock,
@@ -328,7 +328,7 @@ function Home() {
               The transformation is real. Drag to see it.
             </h2>
             <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-              We work with what's there — original bones, load paths, natural light — and reshape it
+              We work with what's there original bones, load paths, natural light and reshape it
               into something you'll actually love using.
             </p>
             <Link to="/projects" className="btn-outline mt-8">
@@ -480,7 +480,7 @@ function Home() {
                 ],
                 [
                   "Are you licensed and insured?",
-                  "Yes — MHIC licensed in Maryland, fully insured, and bonded on every project.",
+                  "Yes  MHIC licensed in Maryland, fully insured, and bonded on every project.",
                 ],
                 [
                   "Do you handle design too?",
@@ -518,7 +518,7 @@ function Home() {
                   Let's talk about your project.
                 </h2>
                 <p className="mt-4 text-background/70 max-w-xl">
-                  Free on-site consultation. No obligation, no pressure — just honest numbers and a
+                  Free on-site consultation. No obligation, no pressure just honest numbers and a
                   realistic timeline.
                 </p>
               </div>
@@ -526,8 +526,8 @@ function Home() {
                 <Link to="/contact" className="btn-primary">
                   Free Estimate
                 </Link>
-                <a href="tel:+15551234567" className="btn-ghost-light">
-                  Call (555) 123-4567
+                <a href="tel:+12407818778" className="btn-ghost-light">
+                  (240) 781-8778
                 </a>
               </div>
             </div>

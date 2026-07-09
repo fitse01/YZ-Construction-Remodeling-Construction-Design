@@ -15,14 +15,17 @@ import after from "@/assets/after.jpg";
 export const Route = createFileRoute("/projects")({
   head: () => ({
     meta: [
-      { title: "Projects & Portfolio — YZ Construction, DMV" },
+      { title: "Projects & Portfolio  YZ Construction, DMV" },
       {
         name: "description",
         content:
           "Browse our recent kitchen, bath, whole-home, restaurant and commercial construction projects across Maryland, DC and Northern Virginia.",
       },
-      { property: "og:title", content: "Projects — YZ Construction" },
-      { property: "og:description", content: "Portfolio of residential & commercial builds across the DMV." },
+      { property: "og:title", content: "Projects  YZ Construction" },
+      {
+        property: "og:description",
+        content: "Portfolio of residential & commercial builds across the DMV.",
+      },
       { property: "og:url", content: "/projects" },
       { property: "og:image", content: kitchen },
     ],
@@ -31,17 +34,67 @@ export const Route = createFileRoute("/projects")({
   component: Projects,
 });
 
-const categories = ["All", "Residential", "Kitchen", "Bathroom", "Restaurant", "Commercial", "Exterior"] as const;
+const categories = [
+  "All",
+  "Residential",
+  "Kitchen",
+  "Bathroom",
+  "Restaurant",
+  "Commercial",
+  "Exterior",
+] as const;
 
 const projects = [
-  { title: "Waterfall Island Kitchen", loc: "Bethesda, MD", cat: "Kitchen", year: "2025", img: kitchen },
+  {
+    title: "Waterfall Island Kitchen",
+    loc: "Bethesda, MD",
+    cat: "Kitchen",
+    year: "2025",
+    img: kitchen,
+  },
   { title: "Moody Spa Bath", loc: "Washington, DC", cat: "Bathroom", year: "2025", img: bathroom },
-  { title: "Brick & Brass Bistro", loc: "Arlington, VA", cat: "Restaurant", year: "2024", img: restaurant },
-  { title: "Open-Plan Office Fit-Out", loc: "Silver Spring, MD", cat: "Commercial", year: "2024", img: commercial },
-  { title: "Craftsman Revival", loc: "Kensington, MD", cat: "Exterior", year: "2024", img: exterior },
-  { title: "Minimal Living Redesign", loc: "Rockville, MD", cat: "Residential", year: "2025", img: interior },
-  { title: "Executive Bath Retreat", loc: "McLean, VA", cat: "Bathroom", year: "2024", img: bathroom },
-  { title: "Chef's Kitchen Rebuild", loc: "Chevy Chase, MD", cat: "Kitchen", year: "2023", img: kitchen },
+  {
+    title: "Brick & Brass Bistro",
+    loc: "Arlington, VA",
+    cat: "Restaurant",
+    year: "2024",
+    img: restaurant,
+  },
+  {
+    title: "Open-Plan Office Fit-Out",
+    loc: "Silver Spring, MD",
+    cat: "Commercial",
+    year: "2024",
+    img: commercial,
+  },
+  {
+    title: "Craftsman Revival",
+    loc: "Kensington, MD",
+    cat: "Exterior",
+    year: "2024",
+    img: exterior,
+  },
+  {
+    title: "Minimal Living Redesign",
+    loc: "Rockville, MD",
+    cat: "Residential",
+    year: "2025",
+    img: interior,
+  },
+  {
+    title: "Executive Bath Retreat",
+    loc: "McLean, VA",
+    cat: "Bathroom",
+    year: "2024",
+    img: bathroom,
+  },
+  {
+    title: "Chef's Kitchen Rebuild",
+    loc: "Chevy Chase, MD",
+    cat: "Kitchen",
+    year: "2023",
+    img: kitchen,
+  },
 ];
 
 function Projects() {
@@ -52,7 +105,9 @@ function Projects() {
     () =>
       projects.filter(
         (p) =>
-          (cat === "All" || p.cat === cat || (cat === "Residential" && ["Kitchen", "Bathroom", "Exterior"].includes(p.cat))) &&
+          (cat === "All" ||
+            p.cat === cat ||
+            (cat === "Residential" && ["Kitchen", "Bathroom", "Exterior"].includes(p.cat))) &&
           (q === "" || (p.title + p.loc).toLowerCase().includes(q.toLowerCase())),
       ),
     [cat, q],
@@ -99,9 +154,17 @@ function Projects() {
         <div className="container-x">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((p) => (
-              <article key={p.title} className="card-lift group overflow-hidden rounded-2xl border border-border bg-card">
+              <article
+                key={p.title}
+                className="card-lift group overflow-hidden rounded-2xl border border-border bg-card"
+              >
                 <div className="aspect-[4/3] overflow-hidden">
-                  <img src={p.img} alt={p.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <img
+                    src={p.img}
+                    alt={p.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
                 </div>
                 <div className="p-6">
                   <div className="flex items-center gap-2 text-xs font-mono tracking-[0.2em] uppercase text-primary">
@@ -109,15 +172,21 @@ function Projects() {
                   </div>
                   <h3 className="mt-3 text-xl font-display font-semibold">{p.title}</h3>
                   <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {p.loc}</span>
-                    <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {p.year}</span>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5" /> {p.loc}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" /> {p.year}
+                    </span>
                   </div>
                 </div>
               </article>
             ))}
           </div>
           {filtered.length === 0 && (
-            <p className="text-center text-muted-foreground py-16">No projects match that search.</p>
+            <p className="text-center text-muted-foreground py-16">
+              No projects match that search.
+            </p>
           )}
         </div>
       </section>
@@ -127,18 +196,23 @@ function Projects() {
         <div className="container-x">
           <div className="max-w-2xl">
             <span className="eyebrow">Before & after</span>
-            <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">Same footprint. Different life.</h2>
+            <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
+              Same footprint. Different life.
+            </h2>
           </div>
           <div className="mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr] items-center">
             <BeforeAfter before={before} after={after} alt="Bethesda kitchen renovation" />
             <div>
-              <div className="text-xs font-mono tracking-[0.22em] uppercase text-primary">Case Study</div>
-              <h3 className="mt-3 text-2xl font-display font-semibold">Bethesda Kitchen · 8 weeks</h3>
+              <div className="text-xs font-mono tracking-[0.22em] uppercase text-primary">
+                Case Study
+              </div>
+              <h3 className="mt-3 text-2xl font-display font-semibold">
+                Bethesda Kitchen · 8 weeks
+              </h3>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Original 1970s oak kitchen, closed off from the dining room.
-                Removed a load-bearing wall, added a steel beam, redesigned the
-                layout around a 10-ft island, and refinished the original
-                white-oak floors.
+                Original 1970s oak kitchen, closed off from the dining room. Removed a load-bearing
+                wall, added a steel beam, redesigned the layout around a 10-ft island, and
+                refinished the original white-oak floors.
               </p>
               <dl className="mt-6 grid grid-cols-3 gap-4 text-sm">
                 {[
@@ -167,7 +241,12 @@ function Projects() {
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {[kitchen, bathroom, restaurant].map((img, i) => (
               <button key={i} className="group relative aspect-video rounded-2xl overflow-hidden">
-                <img src={img} alt="Video thumbnail" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img
+                  src={img}
+                  alt="Video thumbnail"
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
                 <div className="absolute inset-0 bg-black/40 grid place-items-center">
                   <PlayCircle className="w-14 h-14 text-white drop-shadow-lg" />
                 </div>
@@ -180,9 +259,15 @@ function Projects() {
       <section className="section">
         <div className="container-x">
           <div className="rounded-3xl bg-foreground text-background p-10 md:p-16 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Your project could be next.</h2>
-            <p className="mt-4 text-background/70 max-w-xl mx-auto">Free consultation. Fixed-price bid. Fully licensed and insured.</p>
-            <Link to="/contact" className="btn-primary mt-8">Start Your Project</Link>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
+              Your project could be next.
+            </h2>
+            <p className="mt-4 text-background/70 max-w-xl mx-auto">
+              Free consultation. Fixed-price bid. Fully licensed and insured.
+            </p>
+            <Link to="/contact" className="btn-primary mt-8">
+              Start Your Project
+            </Link>
           </div>
         </div>
       </section>

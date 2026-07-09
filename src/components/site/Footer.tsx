@@ -18,8 +18,8 @@ export function Footer() {
             </div>
           </div>
           <p className="mt-5 text-sm text-white/60 max-w-sm leading-relaxed">
-            Family-owned remodeling and construction serving the DMV — Maryland,
-            DC, and Northern Virginia. Licensed, insured, and warrantied.
+            Family-owned remodeling and construction serving the DMV Maryland, DC, and Northern
+            Virginia. Licensed, insured, and warrantied.
           </p>
           <div className="flex gap-3 mt-6">
             {[Instagram, Facebook, Linkedin].map((Icon, i) => (
@@ -79,16 +79,20 @@ export function Footer() {
             <li className="flex items-start gap-2.5">
               <MapPin className="w-4 h-4 mt-0.5 text-primary flex-none" />
               Silver Spring, MD
-              <br />Serving DMV area
+              <br />
+              Serving DMV area
             </li>
             <li>
-              <a href="tel:+15551234567" className="flex items-center gap-2.5 hover:text-primary">
-                <Phone className="w-4 h-4 text-primary" /> (555) 123-4567
+              <a href="tel:+12407818778" className="flex items-center gap-2.5 hover:text-primary">
+                <Phone className="w-4 h-4 text-primary" /> (240) 781-8778
               </a>
             </li>
             <li>
-              <a href="mailto:info@yzconstruction.com" className="flex items-center gap-2.5 hover:text-primary">
-                <Mail className="w-4 h-4 text-primary" /> info@yzconstruction.com
+              <a
+                href="mailto:yohanneszewdebayu@gmail.com"
+                className="flex items-center gap-2.5 hover:text-primary"
+              >
+                <Mail className="w-4 h-4 text-primary" /> yohanneszewdebayu@gmail.com
               </a>
             </li>
           </ul>

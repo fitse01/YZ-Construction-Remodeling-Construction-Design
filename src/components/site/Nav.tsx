@@ -57,7 +57,7 @@ export function Nav() {
 
         <div className="hidden lg:flex items-center gap-3">
           <a
-            href="tel:+15551234567"
+            href="tel:+12407818778"
             className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground"
           >
             <Phone className="w-4 h-4" /> (240) 781-8778

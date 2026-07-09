@@ -11,14 +11,17 @@ import exterior from "@/assets/exterior.jpg";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Services — Kitchens, Baths, Whole-Home & Commercial | YZ Construction" },
+      { title: "Services  Kitchens, Baths, Whole-Home & Commercial | YZ Construction" },
       {
         name: "description",
         content:
           "Full-service remodeling and construction in the DMV: kitchens, bathrooms, whole-home renovations, restaurant build-outs, commercial fit-outs, painting, flooring, framing and carpentry.",
       },
-      { property: "og:title", content: "Services — YZ Construction" },
-      { property: "og:description", content: "Design-build residential and commercial services in the DMV." },
+      { property: "og:title", content: "Services  YZ Construction" },
+      {
+        property: "og:description",
+        content: "Design-build residential and commercial services in the DMV.",
+      },
       { property: "og:url", content: "/services" },
     ],
     links: [{ rel: "canonical", href: "/services" }],
@@ -32,42 +35,72 @@ const services = [
     title: "Kitchen Remodeling",
     lead: "Custom cabinetry, natural stone, and lighting that actually works.",
     img: kitchen,
-    bullets: ["Custom & semi-custom cabinetry", "Quartz, granite & marble tops", "Electrical, plumbing, ventilation", "Structural wall removal"],
+    bullets: [
+      "Custom & semi-custom cabinetry",
+      "Quartz, granite & marble tops",
+      "Electrical, plumbing, ventilation",
+      "Structural wall removal",
+    ],
   },
   {
     id: "bathroom",
     title: "Bathroom Remodeling",
     lead: "Spa-quality baths built for daily rituals.",
     img: bathroom,
-    bullets: ["Wet-room & curbless showers", "Freestanding tub installs", "Heated floors & niches", "Waterproofing done right"],
+    bullets: [
+      "Wet-room & curbless showers",
+      "Freestanding tub installs",
+      "Heated floors & niches",
+      "Waterproofing done right",
+    ],
   },
   {
     id: "home",
     title: "Whole-Home Renovation",
-    lead: "Reshape how you live — one project, one team, one schedule.",
+    lead: "Reshape how you live  one project, one team, one schedule.",
     img: interior,
-    bullets: ["Additions & bump-outs", "Structural & load-bearing changes", "Kitchens + baths + finishes", "Permit and inspection handled"],
+    bullets: [
+      "Additions & bump-outs",
+      "Structural & load-bearing changes",
+      "Kitchens + baths + finishes",
+      "Permit and inspection handled",
+    ],
   },
   {
     id: "restaurant",
     title: "Restaurant Renovation",
     lead: "Fast-track build-outs that open on schedule.",
     img: restaurant,
-    bullets: ["Hood, grease trap & MEP coordination", "ADA & health-code compliance", "Millwork & banquettes", "Night-shift work available"],
+    bullets: [
+      "Hood, grease trap & MEP coordination",
+      "ADA & health-code compliance",
+      "Millwork & banquettes",
+      "Night-shift work available",
+    ],
   },
   {
     id: "commercial",
     title: "Commercial Build-Out",
-    lead: "Offices, retail, and mixed-use — turnkey delivery.",
+    lead: "Offices, retail, and mixed-use  turnkey delivery.",
     img: commercial,
-    bullets: ["Tenant improvements", "Glass partitions & millwork", "MEP coordination", "After-hours install"],
+    bullets: [
+      "Tenant improvements",
+      "Glass partitions & millwork",
+      "MEP coordination",
+      "After-hours install",
+    ],
   },
   {
     id: "exterior",
     title: "Exterior & Framing",
-    lead: "Framing, siding, decks, and additions — the bones done right.",
+    lead: "Framing, siding, decks, and additions  the bones done right.",
     img: exterior,
-    bullets: ["Rough & finish carpentry", "Framing & structural repair", "Siding, roofing coordination", "Decks & outdoor living"],
+    bullets: [
+      "Rough & finish carpentry",
+      "Framing & structural repair",
+      "Siding, roofing coordination",
+      "Decks & outdoor living",
+    ],
   },
 ];
 
@@ -86,7 +119,7 @@ function Services() {
       <PageHero
         eyebrow="Services"
         title="Design-build for homes and businesses across the DMV."
-        description="One team from first sketch to final punch-list — with the crews, credentials, and coordination to deliver every scope, big or small."
+        description="One team from first sketch to final punch-list  with the crews, credentials, and coordination to deliver every scope, big or small."
       />
 
       {/* SERVICE INDEX */}
@@ -120,11 +153,18 @@ function Services() {
             }`}
           >
             <div className="rounded-3xl overflow-hidden aspect-[4/3]">
-              <img src={s.img} alt={s.title} className="w-full h-full object-cover" loading="lazy" />
+              <img
+                src={s.img}
+                alt={s.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             </div>
             <div>
               <span className="eyebrow">0{i + 1} · Service</span>
-              <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-balance">{s.title}</h2>
+              <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-balance">
+                {s.title}
+              </h2>
               <p className="mt-5 text-lg text-muted-foreground leading-relaxed">{s.lead}</p>
               <ul className="mt-6 grid sm:grid-cols-2 gap-3">
                 {s.bullets.map((b) => (
@@ -135,8 +175,12 @@ function Services() {
                 ))}
               </ul>
               <div className="mt-8 flex gap-3">
-                <Link to="/contact" className="btn-primary">Free Estimate</Link>
-                <Link to="/projects" className="btn-outline">See Examples</Link>
+                <Link to="/contact" className="btn-primary">
+                  Free Estimate
+                </Link>
+                <Link to="/projects" className="btn-outline">
+                  See Examples
+                </Link>
               </div>
             </div>
           </div>
@@ -168,7 +212,9 @@ function Services() {
             <span className="eyebrow" style={{ color: "oklch(0.78 0.16 145)" }}>
               How it works
             </span>
-            <h2 className="mt-4 text-4xl font-bold tracking-tight">A process built to remove surprises.</h2>
+            <h2 className="mt-4 text-4xl font-bold tracking-tight">
+              A process built to remove surprises.
+            </h2>
           </div>
           <ol className="mt-12 grid gap-8 md:grid-cols-4">
             {[
@@ -194,10 +240,22 @@ function Services() {
           <h2 className="mt-4 text-4xl font-bold tracking-tight">Common questions.</h2>
           <div className="mt-10 divide-y divide-border border-y border-border">
             {[
-              ["Do you provide a fixed price?", "Yes — after the on-site estimate, we submit a fixed-price bid so there are no surprises unless you change scope."],
-              ["How long is a typical bathroom?", "Standard baths run 3–5 weeks; full primary baths 5–7 weeks."],
-              ["Do you help with permits?", "Yes — we handle permits, drawings, and inspections end-to-end."],
-              ["Can we live in the house during a remodel?", "For most projects, yes. We seal work zones, protect finishes, and clean daily."],
+              [
+                "Do you provide a fixed price?",
+                "Yes  after the on-site estimate, we submit a fixed-price bid so there are no surprises unless you change scope.",
+              ],
+              [
+                "How long is a typical bathroom?",
+                "Standard baths run 3–5 weeks; full primary baths 5–7 weeks.",
+              ],
+              [
+                "Do you help with permits?",
+                "Yes  we handle permits, drawings, and inspections end-to-end.",
+              ],
+              [
+                "Can we live in the house during a remodel?",
+                "For most projects, yes. We seal work zones, protect finishes, and clean daily.",
+              ],
             ].map(([q, a]) => (
               <details key={q} className="group py-5">
                 <summary className="flex items-center justify-between cursor-pointer list-none font-semibold">
@@ -215,12 +273,26 @@ function Services() {
         <div className="container-x">
           <div className="rounded-3xl bg-primary text-primary-foreground p-10 md:p-16 grid gap-8 md:grid-cols-[1.6fr_1fr] items-center">
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Have a project in mind? Let's price it.</h2>
-              <p className="mt-4 text-primary-foreground/80">Free on-site estimate. Fixed-price bid within 5 business days.</p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
+                Have a project in mind? Let's price it.
+              </h2>
+              <p className="mt-4 text-primary-foreground/80">
+                Free on-site estimate. Fixed-price bid within 5 business days.
+              </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">
-              <Link to="/contact" className="btn-outline !border-white !text-white hover:!bg-white/10">Free Estimate</Link>
-              <a href="tel:+15551234567" className="btn-outline !border-white !text-white hover:!bg-white/10">Call Us</a>
+              <Link
+                to="/contact"
+                className="btn-outline !border-white !text-white hover:!bg-white/10"
+              >
+                Free Estimate
+              </Link>
+              <a
+                href="tel:+12407818778"
+                className="btn-outline !border-white !text-white hover:!bg-white/10"
+              >
+                Call Us
+              </a>
             </div>
           </div>
         </div>
