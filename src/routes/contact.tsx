@@ -85,7 +85,7 @@ function Contact() {
 
       {/* CONTACT SPLIT */}
       <section className="section">
-        <div className="container-x grid gap-10 lg:grid-cols-[1.4fr_1fr] max-sm:mx-6">
+        <div className="container-x grid gap-10 lg:grid-cols-[1.4fr_1fr] ">
           {/* FORM */}
           <div className="rounded-3xl bg-card border border-border sm:p-6 md:p-10">
             {sent ? (
