@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck, HardHat, Heart, Award, Leaf, Users } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/Layout";
 import { Counter } from "@/components/site/Counter";
-import owner from "@/assets/owner.jpg";
+import owner from "@/assets/owner.jpeg";
 import team from "@/assets/team.jpg";
 
 export const Route = createFileRoute("/about")({
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "Meet John Zewde and the YZ Construction team  a family-owned design-build shop serving Maryland, DC and Virginia with over a decade of remodeling expertise.",
+          "Meet Yohannes Zewde and the YZ Construction team  a family-owned design-build shop serving Maryland, DC and Virginia with over a decade of remodeling expertise.",
       },
       { property: "og:title", content: "About YZ Construction" },
       { property: "og:description", content: "Family-owned design-build serving the DMV." },
@@ -29,19 +29,19 @@ function About() {
       <PageHero
         eyebrow="About YZ Construction"
         title="A family shop. A craftsman's mindset. A designer's eye."
-        description="Founded by John Zewde in Silver Spring, MD, YZ Construction has spent over a decade turning tired spaces into homes and businesses people love to walk into."
+        description="Founded by Yohannes Zewde in Silver Spring, MD, YZ Construction has spent over a decade turning tired spaces into homes and businesses people love to walk into."
       />
 
       {/* STORY + OWNER */}
       <section className="section">
         <div className="container-x grid gap-14 lg:grid-cols-2 items-center">
           <div className="relative aspect-[4/5] rounded-3xl overflow-hidden">
-            <img src={owner} alt="John Zewde, founder" className="w-full h-full object-cover" />
+            <img src={owner} alt="Yohannes Zewde, founder" className="w-full h-full object-cover" />
             <div className="absolute bottom-6 left-6 right-6 bg-background/95 backdrop-blur rounded-2xl p-5">
               <div className="text-xs font-mono tracking-[0.22em] uppercase text-primary">
                 Founder & Owner
               </div>
-              <div className="mt-1 text-xl font-display font-semibold">John Zewde</div>
+              <div className="mt-1 text-xl font-display font-semibold">Yohannes Zewde</div>
               <div className="text-sm text-muted-foreground">Silver Spring, MD</div>
             </div>
           </div>
@@ -52,7 +52,7 @@ function About() {
             </h2>
             <div className="mt-6 space-y-5 text-lg text-muted-foreground leading-relaxed">
               <p>
-                John started YZ Construction with a pickup truck, a set of tools, and a stubborn
+                Yohannes started YZ Construction with a pickup truck, a set of tools, and a stubborn
                 belief that renovations don't have to be a nightmare. Twelve years later, the trucks
                 are newer and the projects are bigger but the standard is the same.
               </p>
@@ -100,7 +100,7 @@ function About() {
               [12, "+", "Years in business"],
               [320, "+", "Projects delivered"],
               [45, "+", "In-house crew members"],
-              [98, "%", "Client satisfaction"],
+              [95, "%", "Client satisfaction"],
             ].map(([n, s, l]) => (
               <div key={l as string}>
                 <div className="text-5xl md:text-6xl font-bold">
@@ -133,7 +133,7 @@ function About() {
             />
             <div className="grid gap-4">
               {[
-                ["John Zewde", "Founder & Owner"],
+                ["Yohannes Zewde", "Founder & Owner"],
                 ["Miguel R.", "Senior Project Manager"],
                 ["Anthony B.", "Lead Carpenter"],
                 ["Elena S.", "Interior Designer"],

@@ -11,6 +11,7 @@ import exterior from "@/assets/exterior.jpg";
 import interior from "@/assets/interior.jpg";
 import before from "@/assets/before.jpg";
 import after from "@/assets/after.jpg";
+import carpentry from "@/assets/carpentery.jpeg"; // Import your carpentry/furniture image
 
 export const Route = createFileRoute("/projects")({
   head: () => ({
@@ -42,6 +43,7 @@ const categories = [
   "Restaurant",
   "Commercial",
   "Exterior",
+  "Furniture & Carpentry",
 ] as const;
 
 const projects = [
@@ -94,6 +96,13 @@ const projects = [
     cat: "Kitchen",
     year: "2023",
     img: kitchen,
+  },
+  {
+    title: "Custom Furniture & Cabinetry",
+    loc: "Georgetown, DC",
+    cat: "Furniture & Carpentry",
+    year: "2024",
+    img: carpentry,
   },
 ];
 

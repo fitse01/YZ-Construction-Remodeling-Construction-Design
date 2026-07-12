@@ -131,7 +131,7 @@ function Home() {
             {[
               ["Licensed", "MHIC"],
               ["Insured", "Fully"],
-              ["Warranty", "2-Year"],
+              ["Warranty", "1-Year"],
               ["Response", "< 24h"],
             ].map(([label, value]) => (
               <div
@@ -159,7 +159,7 @@ function Home() {
           </div>
           <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
             <p>
-              Founded by John Zewde in Silver Spring, YZ Construction has spent over a decade
+              Founded by Yohannes Zewde in Silver Spring, YZ Construction has spent over a decade
               renovating homes, restaurants, and commercial spaces across the DMV. We're small
               enough to care about every detail and structured enough to deliver on time and on
               budget.
@@ -168,7 +168,7 @@ function Home() {
               {[
                 { n: 12, s: "+", l: "Years building" },
                 { n: 320, s: "+", l: "Projects delivered" },
-                { n: 98, s: "%", l: "Client satisfaction" },
+                { n: 95, s: "%", l: "Client satisfaction" },
                 { n: 24, s: "h", l: "Response time" },
               ].map((s) => (
                 <div key={s.l}>
@@ -203,7 +203,7 @@ function Home() {
               },
               {
                 icon: Award,
-                t: "2-Year Warranty",
+                t: "1-Year Warranty",
                 d: "Workmanship warranty on every project, no fine print.",
               },
               {
@@ -399,7 +399,7 @@ function Home() {
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                q: "John and his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
+                q: "Yohannesand his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
                 a: "Sarah & Michael K.",
                 l: "Bethesda, MD",
               },

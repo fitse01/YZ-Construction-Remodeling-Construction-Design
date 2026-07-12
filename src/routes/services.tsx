@@ -7,6 +7,7 @@ import restaurant from "@/assets/restaurant.jpg";
 import commercial from "@/assets/commercial.jpg";
 import interior from "@/assets/interior.jpg";
 import exterior from "@/assets/exterior.jpg";
+import carpentry from "@/assets/carpentery.jpeg"; // Import your carpentry/furniture image
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -100,6 +101,18 @@ const services = [
       "Framing & structural repair",
       "Siding, roofing coordination",
       "Decks & outdoor living",
+    ],
+  },
+  {
+    id: "custom-carpentry",
+    title: "Custom Carpentry & Furniture Design",
+    lead: "Handcrafted woodwork and custom furniture tailored to your space and lifestyle.",
+    img: carpentry, // Replace with your carpentry/furniture image import
+    bullets: [
+      "Custom cabinets & built-in storage",
+      "Bespoke furniture & woodwork",
+      "Wardrobes, shelving & TV units",
+      "Furniture repair & restoration",
     ],
   },
 ];

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/testimonials")({
 
 const reviews = [
   {
-    q: "John and his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
+    q: "Yohannesand his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
     a: "Sarah & Michael K.",
     l: "Bethesda, MD",
   },
