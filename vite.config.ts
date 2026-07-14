@@ -12,4 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Force Node.js preset
+  nitro: {
+    preset: "node-server",
+  },
 });
