@@ -10,6 +10,7 @@ const links = [
   { to: "/projects", label: "Projects" },
   { to: "/testimonials", label: "Testimonials" },
   { to: "/contact", label: "Contact" },
+  { to: "/login", label: "Login", adminOnly: true },
 ] as const;
 
 export function Nav() {
@@ -42,7 +43,7 @@ export function Nav() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
-          {links.map((l) => (
+          {links.filter(l => !l.adminOnly).map((l) => (
             <Link
               key={l.to}
               to={l.to}
@@ -53,6 +54,12 @@ export function Nav() {
               {l.label}
             </Link>
           ))}
+          <Link
+            to="/login"
+            className="px-3.5 py-2 text-sm font-medium text-foreground/75 hover:text-foreground rounded-full transition-colors"
+          >
+            Login
+          </Link>
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">

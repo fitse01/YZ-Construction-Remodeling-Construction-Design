@@ -60,7 +60,7 @@ function Contact() {
   const [sent, setSent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const data = Object.fromEntries(fd.entries());
@@ -72,7 +72,25 @@ function Contact() {
       return;
     }
     setErrors({});
-    setSent(true);
+
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      setSent(true);
+    } catch (error) {
+      console.error('Failed to submit form:', error);
+      alert('Failed to send message. Please try again or call us directly.');
+    }
   };
 
   return (
