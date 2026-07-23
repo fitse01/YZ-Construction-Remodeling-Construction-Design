@@ -1,9 +1,18 @@
 import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../middleware/auth';
 import prisma from '../config/database';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken, TokenPayload } from '../config/jwt';
 import { sendPasswordResetEmail } from '../config/email';
+
+const userSelect = {
+  id: true,
+  email: true,
+  name: true,
+  profileImageUrl: true,
+  role: true,
+} as const;
 
 export const login = async (req: AuthRequest, res: Response) => {
   try {
@@ -68,12 +77,10 @@ export const login = async (req: AuthRequest, res: Response) => {
     });
 
     res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
+      user: await prisma.user.findUnique({
+        where: { id: user.id },
+        select: userSelect,
+      }),
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -175,9 +182,8 @@ export const forgotPassword = async (req: AuthRequest, res: Response) => {
       role: user.role,
     };
 
-    const resetToken = generateRefreshToken({
-      ...tokenPayload,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+    const resetToken = jwt.sign(tokenPayload, process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key', {
+      expiresIn: '1h',
     });
 
     // Send email with reset token
@@ -266,5 +272,71 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Change password error:', error);
     res.status(500).json({ error: 'Failed to change password' });
+  }
+};
+
+export const me = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: userSelect,
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Get current user error:', error);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+};
+
+export const updateProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { name, email, profileImageUrl } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
+
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email,
+        NOT: { id: req.user.userId },
+      },
+    });
+
+    if (existingEmail) {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
+
+    await prisma.user.update({
+      where: { id: req.user.userId },
+      data: {
+        name,
+        email,
+        profileImageUrl: profileImageUrl || null,
+      },
+    });
+
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: userSelect,
+    });
+
+    res.json({ user: updatedUser });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
   }
 };

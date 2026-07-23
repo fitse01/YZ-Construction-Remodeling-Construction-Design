@@ -6,8 +6,10 @@ import Projects from './pages/Projects'
 import Services from './pages/Services'
 import Testimonials from './pages/Testimonials'
 import Homepage from './pages/Homepage'
+import SiteSettings from './pages/SiteSettings'
 import Messages from './pages/Messages'
 import Settings from './pages/Settings'
+import MediaLibrary from './pages/MediaLibrary'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -57,6 +59,30 @@ function App() {
             }
           />
           <Route
+            path="/gallery"
+            element={
+              <ProtectedRoute>
+                <MediaLibrary initialType="image" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/media/images"
+            element={
+              <ProtectedRoute>
+                <MediaLibrary initialType="image" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/media/videos"
+            element={
+              <ProtectedRoute>
+                <MediaLibrary initialType="video" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/messages"
             element={
               <ProtectedRoute>
@@ -66,6 +92,38 @@ function App() {
           />
           <Route
             path="/settings"
+            element={
+              <ProtectedRoute>
+                <SiteSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/seo"
+            element={
+              <ProtectedRoute>
+                <SiteSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/navigation"
+            element={
+              <ProtectedRoute>
+                <SiteSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/security"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
             element={
               <ProtectedRoute>
                 <Settings />

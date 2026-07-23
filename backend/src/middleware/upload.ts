@@ -5,35 +5,40 @@ import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
-const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '10485760'); // 10MB default
+const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '52428800', 10); // 50MB default
 
 // Allowed file types
-const ALLOWED_IMAGE_TYPES = (process.env.ALLOWED_IMAGE_TYPES || 'image/jpeg,image/png,image/webp,image/gif').split(',');
+const ALLOWED_IMAGE_TYPES = (process.env.ALLOWED_IMAGE_TYPES || 'image/jpeg,image/png,image/webp,image/gif,image/svg+xml').split(',');
 const ALLOWED_VIDEO_TYPES = (process.env.ALLOWED_VIDEO_TYPES || 'video/mp4,video/webm,video/quicktime').split(',');
+const ALLOWED_DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
-// Ensure upload directories exist
-const ensureUploadDir = (projectId: string, type: 'images' | 'videos') => {
-  const dir = path.join(UPLOAD_DIR, 'projects', projectId, type);
+// Ensure folder directory exists
+export const ensureFolderDir = (folder: string) => {
+  const safeFolder = folder.replace(/[^a-zA-Z0-9_-]/g, '') || 'general';
+  const dir = path.join(UPLOAD_DIR, safeFolder);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  return dir;
+  return { dir, safeFolder };
 };
 
-// Generate unique filename
 const generateFilename = (originalName: string) => {
-  const ext = path.extname(originalName);
-  const baseName = path.basename(originalName, ext);
+  const ext = path.extname(originalName).toLowerCase();
   const uniqueId = uuidv4();
   return `${uniqueId}${ext}`;
 };
 
-// Storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const { projectId } = req.params;
-    const type = file.mimetype.startsWith('image/') ? 'images' : 'videos';
-    const dir = ensureUploadDir(projectId, type);
+    let targetFolder = req.params.folder || req.query.folder as string || 'general';
+    if (!targetFolder || targetFolder === 'general') {
+      if (req.params.projectId) targetFolder = 'projects';
+      else if (req.params.serviceId) targetFolder = 'services';
+      else if (file.mimetype.startsWith('video/')) targetFolder = 'videos';
+      else if (file.mimetype.startsWith('image/')) targetFolder = 'gallery';
+      else targetFolder = 'documents';
+    }
+    const { dir } = ensureFolderDir(targetFolder);
     cb(null, dir);
   },
   filename: (req, file, cb) => {
@@ -42,91 +47,60 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter
-const fileFilter = (allowedTypes: string[]) => {
-  return (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`));
-    }
-  };
-};
-
-// Image processing: compress and generate thumbnail
-const processImage = async (filePath: string) => {
-  try {
-    const image = sharp(filePath);
-    const metadata = await image.metadata();
-
-    // Generate compressed version
-    const compressedPath = filePath.replace(/(\.[^.]+)$/, '_compressed$1');
-    await image
-      .jpeg({ quality: 80 })
-      .toFile(compressedPath);
-
-    // Generate thumbnail
-    const thumbnailPath = filePath.replace(/(\.[^.]+)$/, '_thumb$1');
-    await image
-      .resize(300, 300, { fit: 'cover' })
-      .jpeg({ quality: 70 })
-      .toFile(thumbnailPath);
-
-    return {
-      width: metadata.width,
-      height: metadata.height,
-      compressedPath,
-      thumbnailPath,
-    };
-  } catch (error) {
-    console.error('Image processing error:', error);
-    throw error;
+const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allAllowed = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES, ...ALLOWED_DOC_TYPES];
+  if (allAllowed.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`File type ${file.mimetype} is not supported.`));
   }
 };
 
-// Multer instances
+export const uploadGeneric = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: MAX_FILE_SIZE },
+});
+
 export const uploadImages = multer({
   storage,
-  fileFilter: fileFilter(ALLOWED_IMAGE_TYPES),
-  limits: {
-    fileSize: MAX_FILE_SIZE,
-    files: 10, // Max 10 images at once
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Invalid image file type.'));
   },
+  limits: { fileSize: MAX_FILE_SIZE },
 });
 
 export const uploadVideos = multer({
   storage,
-  fileFilter: fileFilter(ALLOWED_VIDEO_TYPES),
-  limits: {
-    fileSize: MAX_FILE_SIZE * 5, // Allow larger videos (50MB)
-    files: 3, // Max 3 videos at once
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_VIDEO_TYPES.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Invalid video file type.'));
   },
+  limits: { fileSize: MAX_FILE_SIZE },
 });
 
-// Middleware to process uploaded images
-export const processUploadedImages = async (req: any, res: any, next: any) => {
-  if (!req.files || req.files.length === 0) {
-    return next();
-  }
-
+export const processImage = async (filePath: string) => {
   try {
-    const processedFiles = await Promise.all(
-      req.files.map(async (file: Express.Multer.File) => {
-        if (file.mimetype.startsWith('image/')) {
-          const processed = await processImage(file.path);
-          return {
-            ...file,
-            ...processed,
-          };
-        }
-        return file;
-      })
-    );
+    const image = sharp(filePath);
+    const metadata = await image.metadata();
 
-    req.files = processedFiles;
-    next();
+    const ext = path.extname(filePath);
+    const thumbnailPath = filePath.replace(ext, `_thumb${ext}`);
+
+    if (metadata.format !== 'svg') {
+      await image
+        .resize(400, 400, { fit: 'cover', position: 'center' })
+        .toFile(thumbnailPath);
+    }
+
+    return {
+      width: metadata.width || 0,
+      height: metadata.height || 0,
+      thumbnailPath: fs.existsSync(thumbnailPath) ? thumbnailPath : filePath,
+    };
   } catch (error) {
-    console.error('Image processing error:', error);
-    return res.status(500).json({ error: 'Failed to process images' });
+    console.error('Image processing fallback:', error);
+    return { width: 0, height: 0, thumbnailPath: filePath };
   }
 };

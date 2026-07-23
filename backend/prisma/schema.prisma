@@ -54,6 +54,7 @@ model User {
   email             String         @unique
   password          String
   name              String
+  profileImageUrl   String?
   role              UserRole       @default(OWNER)
   refreshToken      String?        @unique
   createdAt         DateTime       @default(now())
@@ -78,6 +79,12 @@ model Project {
   clientName      String?
   isFeatured      Boolean         @default(false)
   tags            String[]
+  videoUrl        String?
+  videoThumbnailUrl String?
+  beforeImageUrl  String?
+  afterImageUrl   String?
+  seoTitle        String?
+  seoDescription  String?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   publishedAt     DateTime?
@@ -97,6 +104,7 @@ model Media {
   id          String   @id @default(uuid())
   projectId   String?
   serviceId   String?
+  folder      String?  @default("general") // 'projects', 'services', 'hero', 'gallery', 'testimonials', 'blog', 'logo', 'videos', 'documents'
   type        String   // 'image' or 'video'
   filename    String
   originalName String
@@ -121,6 +129,7 @@ model Media {
   @@map("media")
   @@index([projectId])
   @@index([serviceId])
+  @@index([folder])
   @@index([type])
 }
 
@@ -136,6 +145,8 @@ model Message {
   isRead      Boolean  @default(false)
   isArchived  Boolean  @default(false)
   isSpam      Boolean  @default(false)
+  replyMessage String? @db.Text
+  repliedAt   DateTime?
   createdAt   DateTime @default(now())
 
   @@map("messages")
@@ -155,6 +166,8 @@ model Service {
   showOnHomepage  Boolean          @default(true)
   displayOrder    Int              @default(0)
   status          ContentStatus     @default(DRAFT)
+  icon            String?
+  timeline        String?
   features        String[]
   benefits        String[]
   tags            String[]
@@ -231,7 +244,7 @@ model HomePage {
   heroCtaLink         String
   heroImageId         String?  @unique
   statsTitle          String?
-  statsSubtitle       String   @db.Text?
+  statsSubtitle       String?  @db.Text
   servicesTitle       String
   servicesSubtitle    String   @db.Text
   projectsTitle       String

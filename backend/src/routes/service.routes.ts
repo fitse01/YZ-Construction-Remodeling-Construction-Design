@@ -14,6 +14,7 @@ router.post('/', authenticate, authorize(['OWNER', 'ADMIN']), serviceController.
 router.put('/:id', authenticate, authorize(['OWNER', 'ADMIN']), serviceController.updateService);
 router.delete('/:id', authenticate, authorize(['OWNER', 'ADMIN']), serviceController.deleteService);
 router.patch('/:id/publish', authenticate, authorize(['OWNER', 'ADMIN']), serviceController.togglePublish);
+router.patch('/:id/archive', authenticate, authorize(['OWNER', 'ADMIN']), serviceController.archiveService);
 router.post('/:id/duplicate', authenticate, authorize(['OWNER', 'ADMIN']), serviceController.duplicateService);
 
 export default router;

@@ -1,28 +1,36 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '../middleware/auth';
+import { uploadGeneric } from '../middleware/upload';
 import * as mediaController from '../controllers/media.controller';
 
 const router = Router();
 
-// All media routes are protected
+// Public media listing if needed, protected upload/delete
+router.get('/', mediaController.getMediaList);
+
 router.post(
-  '/:projectId/images',
+  '/upload',
   authenticate,
-  authorize(['OWNER', 'ADMIN']),
-  mediaController.uploadImage
+  authorize(['OWNER', 'ADMIN', 'STAFF']),
+  uploadGeneric.single('file'),
+  mediaController.uploadMediaFile
 );
+
 router.post(
-  '/:projectId/videos',
+  '/upload/:folder',
   authenticate,
-  authorize(['OWNER', 'ADMIN']),
-  mediaController.uploadVideo
+  authorize(['OWNER', 'ADMIN', 'STAFF']),
+  uploadGeneric.single('file'),
+  mediaController.uploadMediaFile
 );
+
 router.patch(
-  '/:id/reorder',
+  '/:id/rename',
   authenticate,
-  authorize(['OWNER', 'ADMIN']),
-  mediaController.reorderMedia
+  authorize(['OWNER', 'ADMIN', 'STAFF']),
+  mediaController.renameMedia
 );
+
 router.delete(
   '/:id',
   authenticate,

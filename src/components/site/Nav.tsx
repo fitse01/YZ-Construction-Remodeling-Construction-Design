@@ -13,15 +13,31 @@ const links = [
   { to: "/login", label: "Login", adminOnly: true },
 ] as const;
 
+interface SiteSettings {
+  companyPhone?: string;
+  companyEmail?: string;
+  companyAddress?: string;
+}
+
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({});
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/settings/site")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setSiteSettings(data);
+      })
+      .catch((err) => console.error("Failed to load site settings:", err));
   }, []);
 
   return (
@@ -64,10 +80,10 @@ export function Nav() {
 
         <div className="hidden lg:flex items-center gap-3">
           <a
-            href="tel:+12407818778"
+            href={`tel:${siteSettings.companyPhone || '+12407818778'}`}
             className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground"
           >
-            <Phone className="w-4 h-4" /> (240) 781-8778
+            <Phone className="w-4 h-4" /> {siteSettings.companyPhone || '(240) 781-8778'}
           </a>
           <Link to="/contact" className="btn-primary">
             Free Estimate

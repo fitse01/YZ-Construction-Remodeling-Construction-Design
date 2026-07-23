@@ -1,88 +1,159 @@
-import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+import { Request, Response } from 'express';
+import fs from 'fs';
+import path from 'path';
 import prisma from '../config/database';
+import { processImage } from '../middleware/upload';
 
-export const uploadImage = async (req: AuthRequest, res: Response) => {
+export const getMediaList = async (req: Request, res: Response) => {
   try {
-    const { projectId } = req.params;
-    const mediaData = req.body; // This will be populated by the upload middleware
+    const { folder, type, search, page = '1', limit = '60' } = req.query;
 
-    const media = await prisma.media.create({
-      data: {
-        projectId,
-        type: 'image',
-        ...mediaData,
+    const skip = (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10);
+    const take = parseInt(limit as string, 10);
+
+    const where: any = {};
+    if (folder && folder !== 'all') {
+      where.folder = folder as string;
+    }
+    if (type && type !== 'all') {
+      where.type = type as string;
+    }
+    if (search) {
+      where.OR = [
+        { originalName: { contains: search as string, mode: 'insensitive' } },
+        { filename: { contains: search as string, mode: 'insensitive' } },
+      ];
+    }
+
+    const [media, total] = await Promise.all([
+      prisma.media.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.media.count({ where }),
+    ]);
+
+    return res.json({
+      media,
+      pagination: {
+        page: parseInt(page as string, 10),
+        limit: parseInt(limit as string, 10),
+        total,
+        totalPages: Math.ceil(total / parseInt(limit as string, 10)),
       },
     });
-
-    res.status(201).json(media);
   } catch (error) {
-    console.error('Upload image error:', error);
-    res.status(500).json({ error: 'Failed to upload image' });
+    console.error('Get media list error:', error);
+    return res.status(500).json({ error: 'Failed to fetch media' });
   }
 };
 
-export const uploadVideo = async (req: AuthRequest, res: Response) => {
+export const uploadMediaFile = async (req: Request, res: Response) => {
   try {
-    const { projectId } = req.params;
-    const mediaData = req.body; // This will be populated by the upload middleware
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const folder = req.params.folder || req.query.folder as string || 'general';
+    const isVideo = req.file.mimetype.startsWith('video/');
+    const fileType = isVideo ? 'video' : 'image';
+
+    const relativeUrl = `/uploads/${folder}/${req.file.filename}`;
+    let width = null;
+    let height = null;
+    let thumbnailUrl = null;
+    let thumbnailPath = null;
+
+    if (!isVideo && req.file.mimetype.startsWith('image/')) {
+      const processed = await processImage(req.file.path);
+      width = processed.width;
+      height = processed.height;
+      if (processed.thumbnailPath !== req.file.path) {
+        thumbnailPath = processed.thumbnailPath;
+        thumbnailUrl = `/uploads/${folder}/${path.basename(processed.thumbnailPath)}`;
+      }
+    }
 
     const media = await prisma.media.create({
       data: {
-        projectId,
-        type: 'video',
-        ...mediaData,
+        folder,
+        type: fileType,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+        width,
+        height,
+        path: req.file.path,
+        url: relativeUrl,
+        thumbnailPath,
+        thumbnailUrl: thumbnailUrl || relativeUrl,
+        projectId: req.body.projectId || null,
+        serviceId: req.body.serviceId || null,
       },
     });
 
-    res.status(201).json(media);
+    return res.status(201).json(media);
   } catch (error) {
-    console.error('Upload video error:', error);
-    res.status(500).json({ error: 'Failed to upload video' });
+    console.error('Upload media error:', error);
+    return res.status(500).json({ error: 'Failed to upload media file' });
   }
 };
 
-export const reorderMedia = async (req: AuthRequest, res: Response) => {
+export const renameMedia = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { order } = req.body;
+    const { originalName } = req.body;
+
+    if (!originalName) {
+      return res.status(400).json({ error: 'Original name is required' });
+    }
 
     const media = await prisma.media.update({
       where: { id },
-      data: { order },
+      data: { originalName },
     });
 
-    res.json(media);
+    return res.json(media);
   } catch (error) {
-    console.error('Reorder media error:', error);
-    res.status(500).json({ error: 'Failed to reorder media' });
+    console.error('Rename media error:', error);
+    return res.status(500).json({ error: 'Failed to rename media' });
   }
 };
 
-export const deleteMedia = async (req: AuthRequest, res: Response) => {
+export const deleteMedia = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    // Get media info to delete file from filesystem
-    const media = await prisma.media.findUnique({
-      where: { id },
-    });
+    const media = await prisma.media.findUnique({ where: { id } });
 
     if (!media) {
       return res.status(404).json({ error: 'Media not found' });
     }
 
-    // Delete from database (cascade will handle relationships)
-    await prisma.media.delete({
-      where: { id },
-    });
+    await prisma.media.delete({ where: { id } });
 
-    // TODO: Delete file from filesystem using fs.unlink
-    // This should be done after database deletion to avoid orphaned records
+    // Clean up physical file if present
+    if (media.path && fs.existsSync(media.path)) {
+      try {
+        fs.unlinkSync(media.path);
+      } catch (err) {
+        console.error('File unlink error:', err);
+      }
+    }
+    if (media.thumbnailPath && fs.existsSync(media.thumbnailPath) && media.thumbnailPath !== media.path) {
+      try {
+        fs.unlinkSync(media.thumbnailPath);
+      } catch (err) {
+        console.error('Thumbnail unlink error:', err);
+      }
+    }
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     console.error('Delete media error:', error);
-    res.status(500).json({ error: 'Failed to delete media' });
+    return res.status(500).json({ error: 'Failed to delete media' });
   }
 };

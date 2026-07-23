@@ -42,8 +42,8 @@ function Login() {
         throw new Error(data.error || "Login failed");
       }
 
-      // Redirect to admin dashboard
-      window.location.href = "/admin";
+      // Redirect to admin dashboard (separate app on port 5174)
+      window.location.href = "http://localhost:5174";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

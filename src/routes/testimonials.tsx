@@ -1,11 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star, PlayCircle, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/Layout";
 import kitchen from "@/assets/kitchen.jpg";
 import bathroom from "@/assets/bathroom.jpg";
 import restaurant from "@/assets/restaurant.jpg";
 import interior from "@/assets/interior.jpg";
+
+interface Testimonial {
+  id: string;
+  quote: string;
+  author: string;
+  location?: string;
+  rating: number;
+}
 
 export const Route = createFileRoute("/testimonials")({
   head: () => ({
@@ -28,9 +36,9 @@ export const Route = createFileRoute("/testimonials")({
   component: Testimonials,
 });
 
-const reviews = [
+const defaultReviews = [
   {
-    q: "Yohannesand his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
+    q: "Yohannes and his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
     a: "Sarah & Michael K.",
     l: "Bethesda, MD",
   },
@@ -42,21 +50,6 @@ const reviews = [
   {
     q: "Best contractor experience we've ever had. Clean site, on time, and the primary bath is genuinely a room I want to be in.",
     a: "Priya S.",
-    l: "Silver Spring, MD",
-  },
-  {
-    q: "They took a chopped-up first floor and made it feel like one connected space. Communication was A+.",
-    a: "Marcus R.",
-    l: "Washington, DC",
-  },
-  {
-    q: "Fair pricing, no hidden costs, and the crew was respectful of our home every single day.",
-    a: "The Kim Family",
-    l: "Rockville, MD",
-  },
-  {
-    q: "Turned my basement into the best room in the house. Cannot recommend YZ enough.",
-    a: "David P.",
     l: "Silver Spring, MD",
   },
 ];
@@ -89,8 +82,33 @@ const posts = [
 ];
 
 function Testimonials() {
-  const [i, setI] = useState(0);
-  const active = reviews[i];
+  const [reviewsList, setReviewsList] = useState<Array<{ q: string; a: string; l: string }>>(defaultReviews);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      const res = await fetch('/api/testimonials?status=PUBLISHED');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.testimonials && data.testimonials.length > 0) {
+          const mapped = data.testimonials.map((t: Testimonial) => ({
+            q: t.quote,
+            a: t.author,
+            l: t.location || 'DMV',
+          }));
+          setReviewsList(mapped);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch testimonials:', err);
+    }
+  };
+
+  const active = reviewsList[idx] || reviewsList[0];
 
   return (
     <SiteLayout>
@@ -122,14 +140,14 @@ function Testimonials() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setI((i - 1 + reviews.length) % reviews.length)}
+                    onClick={() => setIdx((idx - 1 + reviewsList.length) % reviewsList.length)}
                     className="w-11 h-11 grid place-items-center rounded-full border border-white/20 hover:bg-white/10 transition"
                     aria-label="Previous"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => setI((i + 1) % reviews.length)}
+                    onClick={() => setIdx((idx + 1) % reviewsList.length)}
                     className="w-11 h-11 grid place-items-center rounded-full border border-white/20 hover:bg-white/10 transition"
                     aria-label="Next"
                   >
@@ -146,9 +164,9 @@ function Testimonials() {
       <section className="section pt-0">
         <div className="container-x">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {reviews.map((r) => (
+            {reviewsList.map((r, i) => (
               <figure
-                key={r.a}
+                key={i}
                 className="card-lift bg-card border border-border rounded-2xl p-7 flex flex-col"
               >
                 <div className="flex text-primary mb-4">

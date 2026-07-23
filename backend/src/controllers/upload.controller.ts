@@ -1,9 +1,9 @@
-import { Response } from 'express';
+import { NextFunction, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { uploadImages, uploadVideos } from '../middleware/upload';
 
 export const uploadProjectImages = async (req: AuthRequest, res: Response) => {
-  uploadImages(req, res, (err) => {
+  uploadImages.array('files')(req, res, (err: any) => {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -13,7 +13,7 @@ export const uploadProjectImages = async (req: AuthRequest, res: Response) => {
     }
 
     const files = req.files as Express.Multer.File[];
-    
+
     // Return file information to client
     const uploadedFiles = files.map(file => ({
       filename: file.filename,
@@ -29,7 +29,7 @@ export const uploadProjectImages = async (req: AuthRequest, res: Response) => {
 };
 
 export const uploadProjectVideos = async (req: AuthRequest, res: Response) => {
-  uploadVideos(req, res, (err) => {
+  uploadVideos.array('files')(req, res, (err: any) => {
     if (err) {
       return res.status(400).json({ error: err.message });
     }
@@ -39,7 +39,7 @@ export const uploadProjectVideos = async (req: AuthRequest, res: Response) => {
     }
 
     const files = req.files as Express.Multer.File[];
-    
+
     const uploadedFiles = files.map(file => ({
       filename: file.filename,
       originalName: file.originalname,

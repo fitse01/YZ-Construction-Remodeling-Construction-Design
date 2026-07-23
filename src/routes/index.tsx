@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ShieldCheck,
@@ -49,59 +50,79 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const services = [
-  {
-    icon: HomeIcon,
-    title: "Home Renovation",
-    desc: "Full-scope remodels that reshape the way you live.",
-    img: interior,
-  },
-  {
-    icon: Hammer,
-    title: "Kitchen Remodeling",
-    desc: "Custom cabinetry, stone, lighting  the heart of the home.",
-    img: kitchen,
-  },
-  {
-    icon: Brush,
-    title: "Bathroom Remodeling",
-    desc: "Spa-quality baths built for daily rituals.",
-    img: bathroom,
-  },
-  {
-    icon: UtensilsCrossed,
-    title: "Restaurant Renovation",
-    desc: "Fast-track build-outs that open on schedule.",
-    img: restaurant,
-  },
-  {
-    icon: Building2,
-    title: "Commercial Build-Out",
-    desc: "Offices, retail, and mixed-use  turnkey delivery.",
-    img: commercial,
-  },
-  {
-    icon: Ruler,
-    title: "Interior Design",
-    desc: "Design-build under one roof, one point of contact.",
-    img: exterior,
-  },
-];
+const serviceIconMap: Record<string, any> = {
+  WHOLE_HOME: HomeIcon,
+  KITCHEN: Hammer,
+  BATHROOM: Brush,
+  RESTAURANT: UtensilsCrossed,
+  COMMERCIAL: Building2,
+  EXTERIOR: Ruler,
+  CARPENTRY: Ruler,
+  INTERIOR: HomeIcon,
+};
+
+const serviceFallbackImages: Record<string, string> = {
+  WHOLE_HOME: interior,
+  KITCHEN: kitchen,
+  BATHROOM: bathroom,
+  RESTAURANT: restaurant,
+  COMMERCIAL: commercial,
+  EXTERIOR: exterior,
+  CARPENTRY: interior,
+  INTERIOR: interior,
+};
+
+interface CmsService {
+  id: string;
+  title: string;
+  shortDesc: string;
+  longDesc: string;
+  category: string;
+  coverImage?: { url: string } | null;
+  media?: Array<{ type: string; url: string; thumbnailUrl?: string | null }>;
+}
 
 function Home() {
+  const [cmsPage, setCmsPage] = useState<any>(null);
+  const [services, setServices] = useState<CmsService[]>([]);
+
+  useEffect(() => {
+    fetch("/api/settings/homepage")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setCmsPage(data);
+      })
+      .catch((err) => console.error("Failed to load homepage settings:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/services?status=PUBLISHED&showOnHomepage=true&limit=6")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        setServices(data?.services || []);
+      })
+      .catch((err) => console.error("Failed to load homepage services:", err));
+  }, []);
+
+  const heroTitle = cmsPage?.heroTitle || "Building better spaces for the way you live and work.";
+  const heroSubtitle =
+    cmsPage?.heroSubtitle ||
+    "A boutique design-build studio delivering premium residential and commercial construction across Maryland, DC, and Virginia with the craft, care, and communication a big project deserves.";
+  const heroImg = cmsPage?.heroImage?.url || hero;
+
   return (
     <SiteLayout>
       {/* HERO */}
       <section className="relative min-h-[92vh] flex items-end overflow-hidden">
         <img
-          src={hero}
-          alt="Modern kitchen renovation by YZ Construction"
+          src={heroImg}
+          alt="Modern construction by YZ Construction"
           className="absolute inset-0 w-full h-full object-cover"
           width={1920}
           height={1200}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/40 to-black/30" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/60 to-transparent" />
 
         <div className="container-x relative pb-16 md:pb-24 pt-32 grid gap-10 md:grid-cols-[1.4fr_1fr] items-end">
           <div className="text-white">
@@ -109,17 +130,12 @@ function Home() {
               Silver Spring, MD · Serving the DMV
             </span>
             <h1 className="mt-6 text-5xl sm:text-6xl md:text-7xl font-bold leading-[0.95] tracking-tight max-w-3xl">
-              Building better <span className="text-primary-glow">spaces</span> for the way you live
-              and work.
+              {heroTitle}
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-white/80 leading-relaxed">
-              A boutique design-build studio delivering premium residential and commercial
-              construction across Maryland, DC, and Virginia with the craft, care, and communication
-              a big project deserves.
-            </p>
+            <p className="mt-6 max-w-xl text-lg text-white/80 leading-relaxed">{heroSubtitle}</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link to="/contact" className="btn-primary">
-                Get a Free Estimate <ArrowRight className="w-4 h-4" />
+                {cmsPage?.heroCtaText || "Get a Free Estimate"} <ArrowRight className="w-4 h-4" />
               </Link>
               <Link to="/projects" className="btn-ghost-light">
                 View Our Projects
@@ -154,15 +170,14 @@ function Home() {
           <div>
             <span className="eyebrow">Who we are</span>
             <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-balance">
-              A family-owned shop with a designer's eye and a builder's discipline.
+              {cmsPage?.statsTitle ||
+                "A family-owned shop with a designer's eye and a builder's discipline."}
             </h2>
           </div>
           <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
             <p>
-              Founded by Yohannes Zewde in Silver Spring, YZ Construction has spent over a decade
-              renovating homes, restaurants, and commercial spaces across the DMV. We're small
-              enough to care about every detail and structured enough to deliver on time and on
-              budget.
+              {cmsPage?.statsSubtitle ||
+                "Founded by Yohannes Zewde in Silver Spring, YZ Construction has spent over a decade renovating homes, restaurants, and commercial spaces across the DMV. We're small enough to care about every detail and structured enough to deliver on time and on budget."}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4 border-t border-border">
               {[
@@ -236,7 +251,7 @@ function Home() {
             <div className="max-w-2xl">
               <span className="eyebrow">What we build</span>
               <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
-                Design-build services under one roof.
+                {cmsPage?.servicesTitle || "Design-build services under one roof."}
               </h2>
             </div>
             <Link to="/services" className="btn-outline">
@@ -244,33 +259,52 @@ function Home() {
             </Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map(({ icon: Icon, title, desc, img }) => (
-              <Link
-                key={title}
-                to="/services"
-                className="card-lift group relative overflow-hidden rounded-2xl bg-card border border-border"
-              >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={img}
-                    alt={title}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-2 text-primary">
-                    <Icon className="w-4 h-4" />
-                    <span className="text-xs font-mono tracking-[0.2em] uppercase">Service</span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-semibold">{title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{desc}</p>
-                  <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-foreground group-hover:text-primary transition">
-                    Learn more <ChevronRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </Link>
-            ))}
+            {services.length > 0 ? (
+              services.map((service) => {
+                const Icon = serviceIconMap[service.category] || HomeIcon;
+                const imageSrc =
+                  service.coverImage?.url ||
+                  service.media?.find((item) => item.type === "image")?.thumbnailUrl ||
+                  serviceFallbackImages[service.category] ||
+                  interior;
+
+                return (
+                  <Link
+                    key={service.id}
+                    to="/services"
+                    className="card-lift group relative overflow-hidden rounded-2xl bg-card border border-border"
+                  >
+                    <div className="aspect-4/3 overflow-hidden">
+                      <img
+                        src={imageSrc}
+                        alt={service.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Icon className="w-4 h-4" />
+                        <span className="text-xs font-mono tracking-[0.2em] uppercase">
+                          Service
+                        </span>
+                      </div>
+                      <h3 className="mt-3 text-xl font-semibold">{service.title}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                        {service.shortDesc}
+                      </p>
+                      <span className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-foreground group-hover:text-primary transition">
+                        Learn more <ChevronRight className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="col-span-full rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
+                No published services are available yet.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -282,7 +316,7 @@ function Home() {
             <div>
               <span className="eyebrow">Featured work</span>
               <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
-                Recent projects across the DMV.
+                {cmsPage?.projectsTitle || "Recent projects across the DMV."}
               </h2>
             </div>
             <Link to="/projects" className="btn-outline">
@@ -292,25 +326,25 @@ function Home() {
 
           <div className="grid gap-6 md:grid-cols-6">
             <FeatureCard
-              className="md:col-span-4 aspect-[16/10]"
+              className="md:col-span-4 aspect-16/10"
               img={kitchen}
               tag="Kitchen · Bethesda, MD"
               title="Open-plan chef's kitchen with waterfall island"
             />
             <FeatureCard
-              className="md:col-span-2 aspect-[4/5]"
+              className="md:col-span-2 aspect-4/5"
               img={bathroom}
               tag="Bathroom · DC"
               title="Moody spa-bath retreat"
             />
             <FeatureCard
-              className="md:col-span-2 aspect-[4/5]"
+              className="md:col-span-2 aspect-4/5"
               img={restaurant}
               tag="Restaurant · Arlington, VA"
               title="Brick-and-brass bistro fit-out"
             />
             <FeatureCard
-              className="md:col-span-4 aspect-[16/10]"
+              className="md:col-span-4 aspect-16/10"
               img={exterior}
               tag="Whole-home · Silver Spring, MD"
               title="Craftsman revival, top to bottom"
@@ -383,7 +417,7 @@ function Home() {
             <div className="max-w-2xl">
               <span className="eyebrow">Word of mouth</span>
               <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight">
-                Trusted by homeowners and business owners.
+                {cmsPage?.testimonialsTitle || "Trusted by homeowners and business owners."}
               </h2>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -399,7 +433,7 @@ function Home() {
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                q: "Yohannesand his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
+                q: "Yohannes and his crew transformed our 1960s kitchen into something out of a magazine. Every deadline hit. Every dollar accounted for.",
                 a: "Sarah & Michael K.",
                 l: "Bethesda, MD",
               },
@@ -515,16 +549,16 @@ function Home() {
                   Ready when you are
                 </span>
                 <h2 className="mt-4 text-4xl md:text-5xl font-bold tracking-tight text-balance">
-                  Let's talk about your project.
+                  {cmsPage?.ctaTitle || "Let's talk about your project."}
                 </h2>
                 <p className="mt-4 text-background/70 max-w-xl">
-                  Free on-site consultation. No obligation, no pressure just honest numbers and a
-                  realistic timeline.
+                  {cmsPage?.ctaSubtitle ||
+                    "Free on-site consultation. No obligation, no pressure just honest numbers and a realistic timeline."}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 md:justify-end">
                 <Link to="/contact" className="btn-primary">
-                  Free Estimate
+                  {cmsPage?.ctaButtonText || "Free Estimate"}
                 </Link>
                 <a href="tel:+12407818778" className="btn-ghost-light">
                   (240) 781-8778
@@ -560,7 +594,7 @@ function FeatureCard({
         loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent" />
       <div className="relative h-full flex flex-col justify-end p-7 text-white">
         <span className="text-[10px] font-mono tracking-[0.22em] uppercase text-white/70">
           {tag}

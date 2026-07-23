@@ -1,27 +1,56 @@
-import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import prisma from '../config/database';
-import { ServiceCategory, ContentStatus } from '@prisma/client';
+import { Response } from "express";
+import { AuthRequest } from "../middleware/auth";
+import prisma from "../config/database";
+import { Prisma, ServiceCategory, ContentStatus } from "@prisma/client";
+
+type ServiceQuery = {
+  category?: string | string[];
+  status?: string | string[];
+  showOnHomepage?: string | string[];
+  page?: string | string[];
+  limit?: string | string[];
+};
+
+type ServiceWhere = {
+  category?: ServiceCategory;
+  status?: ContentStatus;
+  showOnHomepage?: boolean;
+};
+
+const readQueryValue = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
 
 export const getServices = async (req: AuthRequest, res: Response) => {
   try {
-    const { category, status, showOnHomepage, page = '1', limit = '10' } = req.query;
+    const {
+      category,
+      status,
+      showOnHomepage,
+      page = "1",
+      limit = "10",
+    } = req.query as ServiceQuery;
 
-    const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
-    const take = parseInt(limit as string);
+    const pageValue = readQueryValue(page) ?? "1";
+    const limitValue = readQueryValue(limit) ?? "10";
+    const categoryValue = readQueryValue(category);
+    const statusValue = readQueryValue(status);
+    const showOnHomepageValue = readQueryValue(showOnHomepage);
 
-    const where: any = {};
+    const skip = (parseInt(pageValue, 10) - 1) * parseInt(limitValue, 10);
+    const take = parseInt(limitValue, 10);
 
-    if (category) {
-      where.category = category as ServiceCategory;
+    const where: ServiceWhere = {};
+
+    if (categoryValue) {
+      where.category = categoryValue as ServiceCategory;
     }
 
-    if (status) {
-      where.status = status as ContentStatus;
+    if (statusValue) {
+      where.status = statusValue as ContentStatus;
     }
 
-    if (showOnHomepage !== undefined) {
-      where.showOnHomepage = showOnHomepage === 'true';
+    if (showOnHomepageValue !== undefined) {
+      where.showOnHomepage = showOnHomepageValue === "true";
     }
 
     const [services, total] = await Promise.all([
@@ -31,11 +60,11 @@ export const getServices = async (req: AuthRequest, res: Response) => {
         take,
         include: {
           media: {
-            orderBy: { order: 'asc' },
+            orderBy: { order: "asc" },
           },
           coverImage: true,
         },
-        orderBy: { displayOrder: 'asc' },
+        orderBy: { displayOrder: "asc" },
       }),
       prisma.service.count({ where }),
     ]);
@@ -43,15 +72,15 @@ export const getServices = async (req: AuthRequest, res: Response) => {
     res.json({
       services,
       pagination: {
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
+        page: parseInt(pageValue, 10),
+        limit: parseInt(limitValue, 10),
         total,
-        totalPages: Math.ceil(total / parseInt(limit as string)),
+        totalPages: Math.ceil(total / parseInt(limitValue, 10)),
       },
     });
   } catch (error) {
-    console.error('Get services error:', error);
-    res.status(500).json({ error: 'Failed to fetch services' });
+    console.error("Get services error:", error);
+    res.status(500).json({ error: "Failed to fetch services" });
   }
 };
 
@@ -63,20 +92,20 @@ export const getServiceById = async (req: AuthRequest, res: Response) => {
       where: { id },
       include: {
         media: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         coverImage: true,
       },
     });
 
     if (!service) {
-      return res.status(404).json({ error: 'Service not found' });
+      return res.status(404).json({ error: "Service not found" });
     }
 
     res.json(service);
   } catch (error) {
-    console.error('Get service error:', error);
-    res.status(500).json({ error: 'Failed to fetch service' });
+    console.error("Get service error:", error);
+    res.status(500).json({ error: "Failed to fetch service" });
   }
 };
 
@@ -88,20 +117,20 @@ export const getServiceBySlug = async (req: AuthRequest, res: Response) => {
       where: { slug },
       include: {
         media: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         coverImage: true,
       },
     });
 
     if (!service) {
-      return res.status(404).json({ error: 'Service not found' });
+      return res.status(404).json({ error: "Service not found" });
     }
 
     res.json(service);
   } catch (error) {
-    console.error('Get service by slug error:', error);
-    res.status(500).json({ error: 'Failed to fetch service' });
+    console.error("Get service by slug error:", error);
+    res.status(500).json({ error: "Failed to fetch service" });
   }
 };
 
@@ -120,16 +149,19 @@ export const createService = async (req: AuthRequest, res: Response) => {
       tags = [],
       seoTitle,
       seoDescription,
+      coverImageId,
     } = req.body;
 
     if (!title || !slug || !category || !shortDesc || !longDesc) {
-      return res.status(400).json({ error: 'Title, slug, category, shortDesc, and longDesc are required' });
+      return res
+        .status(400)
+        .json({ error: "Title, slug, category, shortDesc, and longDesc are required" });
     }
 
     // Check if slug is unique
     const existing = await prisma.service.findUnique({ where: { slug } });
     if (existing) {
-      return res.status(400).json({ error: 'Slug already exists' });
+      return res.status(400).json({ error: "Slug already exists" });
     }
 
     const service = await prisma.service.create({
@@ -146,6 +178,7 @@ export const createService = async (req: AuthRequest, res: Response) => {
         tags,
         seoTitle,
         seoDescription,
+        coverImageId: coverImageId || null,
         status: ContentStatus.DRAFT,
       },
       include: {
@@ -156,8 +189,8 @@ export const createService = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(service);
   } catch (error) {
-    console.error('Create service error:', error);
-    res.status(500).json({ error: 'Failed to create service' });
+    console.error("Create service error:", error);
+    res.status(500).json({ error: "Failed to create service" });
   }
 };
 
@@ -180,14 +213,14 @@ export const updateService = async (req: AuthRequest, res: Response) => {
       coverImageId,
     } = req.body;
 
-    const updateData: any = {};
+    const updateData: Prisma.ServiceUpdateInput = {};
 
     if (title !== undefined) updateData.title = title;
     if (slug !== undefined) {
       // Check if new slug is unique
       const existing = await prisma.service.findUnique({ where: { slug } });
       if (existing && existing.id !== id) {
-        return res.status(400).json({ error: 'Slug already exists' });
+        return res.status(400).json({ error: "Slug already exists" });
       }
       updateData.slug = slug;
     }
@@ -196,19 +229,23 @@ export const updateService = async (req: AuthRequest, res: Response) => {
     if (longDesc !== undefined) updateData.longDesc = longDesc;
     if (showOnHomepage !== undefined) updateData.showOnHomepage = showOnHomepage;
     if (displayOrder !== undefined) updateData.displayOrder = displayOrder;
-    if (features !== undefined) updateData.features = features;
-    if (benefits !== undefined) updateData.benefits = benefits;
-    if (tags !== undefined) updateData.tags = tags;
+    if (features !== undefined) updateData.features = Array.isArray(features) ? features : [];
+    if (benefits !== undefined) updateData.benefits = Array.isArray(benefits) ? benefits : [];
+    if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
     if (seoTitle !== undefined) updateData.seoTitle = seoTitle;
     if (seoDescription !== undefined) updateData.seoDescription = seoDescription;
-    if (coverImageId !== undefined) updateData.coverImageId = coverImageId;
+    if (coverImageId !== undefined) {
+      updateData.coverImage = coverImageId
+        ? { connect: { id: coverImageId } }
+        : { disconnect: true };
+    }
 
     const service = await prisma.service.update({
       where: { id },
       data: updateData,
       include: {
         media: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
         coverImage: true,
       },
@@ -216,8 +253,8 @@ export const updateService = async (req: AuthRequest, res: Response) => {
 
     res.json(service);
   } catch (error) {
-    console.error('Update service error:', error);
-    res.status(500).json({ error: 'Failed to update service' });
+    console.error("Update service error:", error);
+    res.status(500).json({ error: "Failed to update service" });
   }
 };
 
@@ -231,8 +268,8 @@ export const deleteService = async (req: AuthRequest, res: Response) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Delete service error:', error);
-    res.status(500).json({ error: 'Failed to delete service' });
+    console.error("Delete service error:", error);
+    res.status(500).json({ error: "Failed to delete service" });
   }
 };
 
@@ -245,29 +282,57 @@ export const togglePublish = async (req: AuthRequest, res: Response) => {
     });
 
     if (!service) {
-      return res.status(404).json({ error: 'Service not found' });
+      return res.status(404).json({ error: "Service not found" });
     }
 
-    const newStatus = service.status === ContentStatus.PUBLISHED
-      ? ContentStatus.DRAFT
-      : ContentStatus.PUBLISHED;
+    const newStatus =
+      service.status === ContentStatus.PUBLISHED ? ContentStatus.DRAFT : ContentStatus.PUBLISHED;
 
-    const updatedService = await prisma.service.update({
+    const updated = await prisma.service.update({
       where: { id },
-      data: {
-        status: newStatus,
-        publishedAt: newStatus === ContentStatus.PUBLISHED ? new Date() : null,
-      },
+      data: { status: newStatus },
       include: {
-        media: true,
+        media: {
+          orderBy: { order: "asc" },
+        },
         coverImage: true,
       },
     });
 
-    res.json(updatedService);
+    res.json(updated);
   } catch (error) {
-    console.error('Toggle publish error:', error);
-    res.status(500).json({ error: 'Failed to toggle publish status' });
+    console.error("Toggle publish error:", error);
+    res.status(500).json({ error: "Failed to toggle publish status" });
+  }
+};
+
+export const archiveService = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const service = await prisma.service.findUnique({
+      where: { id },
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+
+    const updated = await prisma.service.update({
+      where: { id },
+      data: { status: ContentStatus.ARCHIVED },
+      include: {
+        media: {
+          orderBy: { order: "asc" },
+        },
+        coverImage: true,
+      },
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error("Archive service error:", error);
+    res.status(500).json({ error: "Failed to archive service" });
   }
 };
 
@@ -284,7 +349,7 @@ export const duplicateService = async (req: AuthRequest, res: Response) => {
     });
 
     if (!original) {
-      return res.status(404).json({ error: 'Service not found' });
+      return res.status(404).json({ error: "Service not found" });
     }
 
     const newSlug = `${original.slug}-copy-${Date.now()}`;
@@ -313,7 +378,7 @@ export const duplicateService = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(duplicated);
   } catch (error) {
-    console.error('Duplicate service error:', error);
-    res.status(500).json({ error: 'Failed to duplicate service' });
+    console.error("Duplicate service error:", error);
+    res.status(500).json({ error: "Failed to duplicate service" });
   }
 };
