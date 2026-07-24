@@ -10,11 +10,17 @@ interface SendMessageEmailParams {
   message: string;
 }
 
+interface ReplyEmailParams {
+  name: string;
+  email: string;
+  replyMessage: string;
+}
+
 const createTransporter = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
   const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const pass = process.env.SMTP_PASSWORD || process.env.SMTP_PASS;
 
   if (!user || !pass) {
     return null;
@@ -58,7 +64,7 @@ export const sendNotificationToOwner = async (data: SendMessageEmailParams) => {
     `;
 
     await transporter.sendMail({
-      from: `"YZ Construction Website" <${process.env.SMTP_USER}>`,
+      from: `"YZ Construction Website" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: ownerEmail,
       replyTo: data.email,
       subject: `[New Inquiry] ${data.projectType || 'Project Inquiry'} - ${data.name}`,
@@ -90,7 +96,7 @@ export const sendConfirmationToClient = async (data: SendMessageEmailParams) => 
     `;
 
     await transporter.sendMail({
-      from: `"YZ Construction, LLC" <${process.env.SMTP_USER}>`,
+      from: `"YZ Construction, LLC" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: data.email,
       subject: `We received your inquiry - YZ Construction`,
       html: htmlContent,
@@ -99,6 +105,39 @@ export const sendConfirmationToClient = async (data: SendMessageEmailParams) => 
     return true;
   } catch (error) {
     console.error('❌ Failed to send client confirmation email:', error);
+    return false;
+  }
+};
+
+export const sendReplyToClient = async (data: ReplyEmailParams) => {
+  try {
+    const transporter = createTransporter();
+    if (!transporter) return false;
+
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+        <h2 style="color: #1a202c; border-bottom: 2px solid #2563eb; padding-bottom: 8px;">
+          Response from YZ Construction
+        </h2>
+        <p>Hi ${data.name},</p>
+        <p>Thank you for your inquiry. Here is our response:</p>
+        <div style="background-color: #f7fafc; padding: 15px; border-left: 4px solid #2563eb; margin: 15px 0;">
+          <p style="margin: 0; white-space: pre-wrap;">${data.replyMessage}</p>
+        </div>
+        <p style="margin-top: 20px;">Best regards,<br><strong>YZ Construction, LLC</strong><br>Silver Spring, MD · (240) 781-8778</p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"YZ Construction, LLC" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      to: data.email,
+      subject: `Response to your inquiry - YZ Construction`,
+      html: htmlContent,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to send reply email:', error);
     return false;
   }
 };

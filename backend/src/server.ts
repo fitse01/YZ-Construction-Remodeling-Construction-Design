@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+// Reloading server configuration with updated SMTP password...
 import path from 'path';
 
 // Import routes

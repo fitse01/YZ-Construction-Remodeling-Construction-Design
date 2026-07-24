@@ -139,6 +139,16 @@ export const updateMessageStatus = async (req: Request, res: Response) => {
       data: updateData,
     });
 
+    // Send reply email if a reply message was provided
+    if (replyMessage && message.email) {
+      const { sendReplyToClient } = await import('../services/email.service');
+      sendReplyToClient({
+        name: message.name,
+        email: message.email,
+        replyMessage,
+      }).catch((err: unknown) => console.error('Reply email error:', err));
+    }
+
     return res.json(message);
   } catch (error) {
     console.error('Update message error:', error);
