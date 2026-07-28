@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
-import { Save, Globe, Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react'
+import { Save, Globe, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react'
 import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -30,7 +30,7 @@ interface SiteSettings {
 }
 
 const SiteSettings = () => {
-  const [settings, setSettings] = useState<SiteSettings | null>(null)
+  const [, setSettings] = useState<SiteSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({

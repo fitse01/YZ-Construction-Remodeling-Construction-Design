@@ -20,14 +20,6 @@ import { SiteLayout } from "@/components/site/Layout";
 import { Counter } from "@/components/site/Counter";
 import { BeforeAfter } from "@/components/site/BeforeAfter";
 import hero from "@/assets/hero.jpg";
-import kitchen from "@/assets/kitchen.jpg";
-import bathroom from "@/assets/bathroom.jpg";
-import restaurant from "@/assets/restaurant.jpg";
-import commercial from "@/assets/commercial.jpg";
-import exterior from "@/assets/exterior.jpg";
-import interior from "@/assets/interior.jpg";
-import before from "@/assets/before.jpg";
-import after from "@/assets/after.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -61,15 +53,21 @@ const serviceIconMap: Record<string, any> = {
   INTERIOR: HomeIcon,
 };
 
-const serviceFallbackImages: Record<string, string> = {
-  WHOLE_HOME: interior,
-  KITCHEN: kitchen,
-  BATHROOM: bathroom,
-  RESTAURANT: restaurant,
-  COMMERCIAL: commercial,
-  EXTERIOR: exterior,
-  CARPENTRY: interior,
-  INTERIOR: interior,
+const getYouTubeThumbnail = (url: string | null | undefined) => {
+  if (!url) return null;
+  try {
+    let videoId = "";
+    if (url.includes("watch?v=")) {
+      videoId = url.split("watch?v=")[1]?.split("&")[0] || "";
+    } else if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
+    } else if (url.includes("youtube.com/embed/")) {
+      videoId = url.split("youtube.com/embed/")[1]?.split("?")[0] || "";
+    }
+    return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+  } catch (e) {
+    return null;
+  }
 };
 
 interface CmsService {
@@ -85,6 +83,7 @@ interface CmsService {
 function Home() {
   const [cmsPage, setCmsPage] = useState<any>(null);
   const [services, setServices] = useState<CmsService[]>([]);
+  const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
 
   useEffect(() => {
     fetch("/api/settings/homepage")
@@ -104,11 +103,21 @@ function Home() {
       .catch((err) => console.error("Failed to load homepage services:", err));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/projects?status=PUBLISHED&limit=4")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        setFeaturedProjects(data?.projects || []);
+      })
+      .catch((err) => console.error("Failed to load homepage projects:", err));
+  }, []);
+
   const heroTitle = cmsPage?.heroTitle || "Building better spaces for the way you live and work.";
   const heroSubtitle =
     cmsPage?.heroSubtitle ||
     "A boutique design-build studio delivering premium residential and commercial construction across Maryland, DC, and Virginia with the craft, care, and communication a big project deserves.";
   const heroImg = cmsPage?.heroImage?.url || hero;
+  const beforeAfterProject = featuredProjects.find((p) => p.beforeImageUrl && p.afterImageUrl) || null;
 
   return (
     <SiteLayout>
@@ -265,8 +274,9 @@ function Home() {
                 const imageSrc =
                   service.coverImage?.url ||
                   service.media?.find((item) => item.type === "image")?.thumbnailUrl ||
-                  serviceFallbackImages[service.category] ||
-                  interior;
+                  service.media?.find((item) => item.type === "image")?.url ||
+                  service.media?.[0]?.url ||
+                  "/placeholder-service.jpg";
 
                 return (
                   <Link
@@ -325,30 +335,38 @@ function Home() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-6">
-            <FeatureCard
-              className="md:col-span-4 aspect-16/10"
-              img={kitchen}
-              tag="Kitchen · Bethesda, MD"
-              title="Open-plan chef's kitchen with waterfall island"
-            />
-            <FeatureCard
-              className="md:col-span-2 aspect-4/5"
-              img={bathroom}
-              tag="Bathroom · DC"
-              title="Moody spa-bath retreat"
-            />
-            <FeatureCard
-              className="md:col-span-2 aspect-4/5"
-              img={restaurant}
-              tag="Restaurant · Arlington, VA"
-              title="Brick-and-brass bistro fit-out"
-            />
-            <FeatureCard
-              className="md:col-span-4 aspect-16/10"
-              img={exterior}
-              tag="Whole-home · Silver Spring, MD"
-              title="Craftsman revival, top to bottom"
-            />
+            {featuredProjects.length > 0 ? (
+              featuredProjects.map((project, index) => {
+                const isEven = index % 4 === 0 || index % 4 === 3;
+                const className = isEven ? "md:col-span-4 aspect-16/10" : "md:col-span-2 aspect-4/5";
+                const ytThumbnail = project.youtubeUrl
+                  ? getYouTubeThumbnail(project.youtubeUrl)
+                  : (project.videoUrl ? getYouTubeThumbnail(project.videoUrl) : null);
+                const img =
+                  project.featuredImage?.url ||
+                  project.media?.find((m: any) => m.type === "image")?.url ||
+                  project.videoThumbnailUrl ||
+                  ytThumbnail ||
+                  "/placeholder-project.jpg";
+
+                const catLabel = project.category.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase());
+                const tag = `${catLabel} · ${project.location || "Silver Spring, MD"}`;
+
+                return (
+                  <FeatureCard
+                    key={project.id}
+                    className={className}
+                    img={img}
+                    tag={tag}
+                    title={project.title}
+                  />
+                );
+              })
+            ) : (
+              <div className="col-span-full rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
+                No featured projects published yet.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -369,7 +387,19 @@ function Home() {
               More Before / After <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <BeforeAfter before={before} after={after} alt="Kitchen renovation" />
+          {beforeAfterProject ? (
+            <BeforeAfter
+              before={beforeAfterProject.beforeImageUrl || ""}
+              after={beforeAfterProject.afterImageUrl || ""}
+              alt={`${beforeAfterProject.title} renovation`}
+            />
+          ) : (
+            <BeforeAfter
+              before="/placeholder-before.jpg"
+              after="/placeholder-after.jpg"
+              alt="Transformation example"
+            />
+          )}
         </div>
       </section>
 

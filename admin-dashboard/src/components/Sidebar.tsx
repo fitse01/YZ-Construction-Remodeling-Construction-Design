@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Layout, FolderOpen, MessageSquare, Settings, LogOut, Home, FileText, Image, Video, Mail, Globe, User, ChevronDown, ChevronRight } from 'lucide-react'
+import { Layout, FolderOpen, MessageSquare, Settings, LogOut, Home, FileText, Image, Video, Mail, Globe, User, ChevronDown, ChevronRight, Menu, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react'
 
 const Sidebar = () => {
   const location = useLocation()
   const { user, logout } = useAuth()
+  const [isOpen, setIsOpen] = useState(false)
   const [expandedSections, setExpandedSections] = useState({
     content: true,
     media: false,
@@ -14,7 +15,7 @@ const Sidebar = () => {
     account: false,
   })
 
-  const toggleSection = (section: string) => {
+  const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
   }
 
@@ -53,11 +54,31 @@ const Sidebar = () => {
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/')
 
   return (
-    <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
-      <div className="p-6 border-b border-gray-700">
-        <h1 className="text-xl font-bold">YZ Construction</h1>
-        <p className="text-gray-400 text-sm mt-1">Admin Dashboard</p>
-      </div>
+    <>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-40 p-2 bg-gray-900 text-white rounded-lg md:hidden shadow-lg border border-gray-700 hover:bg-gray-800 transition-colors"
+        aria-label="Toggle sidebar"
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
+        />
+      )}
+
+      <aside
+        className={`w-64 bg-gray-900 text-white min-h-screen flex flex-col flex-shrink-0 transition-transform duration-300 md:translate-x-0 ${
+          isOpen ? 'translate-x-0 fixed inset-y-0 left-0 z-50' : '-translate-x-full fixed inset-y-0 left-0 z-50 md:relative md:flex'
+        }`}
+      >
+        <div className="p-6 border-b border-gray-700">
+          <h1 className="text-xl font-bold">YZ Construction</h1>
+          <p className="text-gray-400 text-sm mt-1">Admin Dashboard</p>
+        </div>
 
       <nav className="flex-1 p-4 overflow-y-auto">
         <ul className="space-y-2">
@@ -278,6 +299,7 @@ const Sidebar = () => {
         </button>
       </div>
     </aside>
+    </>
   )
 }
 

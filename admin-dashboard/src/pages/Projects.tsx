@@ -45,6 +45,8 @@ interface Project {
   completionDate?: string;
   videoUrl?: string;
   videoThumbnailUrl?: string;
+  youtubeUrl?: string;
+  uploadedVideo?: string;
   beforeImageUrl?: string;
   afterImageUrl?: string;
   seoTitle?: string;
@@ -71,6 +73,7 @@ export default function Projects() {
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
+  const [videoSource, setVideoSource] = useState<"upload" | "youtube">("upload");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -84,6 +87,8 @@ export default function Projects() {
     completionDate: "",
     videoUrl: "",
     videoThumbnailUrl: "",
+    youtubeUrl: "",
+    uploadedVideo: "",
     beforeImageUrl: "",
     afterImageUrl: "",
     seoTitle: "",
@@ -104,11 +109,10 @@ export default function Projects() {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch("/api/projects?limit=100");
-      if (res.ok) {
-        const data = await res.json();
-        setProjects(data.projects || []);
-      }
+      const response = await axios.get(`${API_BASE}/api/projects?limit=100`, {
+        withCredentials: true,
+      });
+      setProjects(response.data.projects || []);
     } catch (err) {
       console.error("Failed to fetch projects:", err);
     } finally {
@@ -119,10 +123,10 @@ export default function Projects() {
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this project?")) return;
     try {
-      const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setProjects((prev) => prev.filter((p) => p.id !== id));
-      }
+      await axios.delete(`${API_BASE}/api/projects/${id}`, {
+        withCredentials: true,
+      });
+      setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Failed to delete project:", err);
     }
@@ -130,8 +134,10 @@ export default function Projects() {
 
   const handleTogglePublish = async (id: string) => {
     try {
-      const res = await fetch(`/api/projects/${id}/publish`, { method: "PATCH" });
-      if (res.ok) fetchProjects();
+      await axios.patch(`${API_BASE}/api/projects/${id}/publish`, {}, {
+        withCredentials: true,
+      });
+      fetchProjects();
     } catch (err) {
       console.error("Failed to publish project:", err);
     }
@@ -139,19 +145,26 @@ export default function Projects() {
 
   const handleDuplicate = async (id: string) => {
     try {
-      const res = await fetch(`/api/projects/${id}/duplicate`, { method: "POST" });
-      if (res.ok) fetchProjects();
+      await axios.post(`${API_BASE}/api/projects/${id}/duplicate`, {}, {
+        withCredentials: true,
+      });
+      fetchProjects();
     } catch (err) {
       console.error("Failed to duplicate project:", err);
     }
   };
 
   const refreshEditingProject = async (id: string) => {
-    const res = await fetch(`/api/projects/${id}`);
-    if (!res.ok) return null;
-    const project = await res.json();
-    setEditingProject(project);
-    return project as Project;
+    try {
+      const res = await axios.get(`${API_BASE}/api/projects/${id}`, {
+        withCredentials: true,
+      });
+      setEditingProject(res.data);
+      return res.data as Project;
+    } catch (err) {
+      console.error("Failed to refresh editing project:", err);
+      return null;
+    }
   };
 
   const uploadProjectMedia = async (projectId: string) => {
@@ -234,23 +247,21 @@ export default function Projects() {
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
+        youtubeUrl: videoSource === "youtube" ? formData.youtubeUrl : "",
+        uploadedVideo: videoSource === "upload" ? formData.uploadedVideo : "",
+        videoUrl: videoSource === "youtube" ? formData.youtubeUrl : formData.uploadedVideo,
       };
 
-      const url = editingProject ? `/api/projects/${editingProject.id}` : "/api/projects";
-      const method = editingProject ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
+      const url = editingProject ? `${API_BASE}/api/projects/${editingProject.id}` : `${API_BASE}/api/projects`;
+      const response = await axios({
+        url,
+        method: editingProject ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        data: payload,
+        withCredentials: true,
       });
 
-      if (!res.ok) {
-        alert("Error saving project");
-        return;
-      }
-
-      const savedProject = await res.json();
+      const savedProject = response.data;
       const projectId = savedProject.id;
 
       const uploadedMedia = await uploadProjectMedia(projectId);
@@ -261,9 +272,12 @@ export default function Projects() {
         if (firstImage) nextUpdate.featuredImageId = firstImage.id;
       }
 
-      if (!payload.videoUrl) {
+      if (videoSource === "upload") {
         const firstVideo = uploadedMedia.find((item) => item.type === "video");
-        if (firstVideo) nextUpdate.videoUrl = firstVideo.url;
+        if (firstVideo) {
+          nextUpdate.uploadedVideo = firstVideo.url;
+          nextUpdate.videoUrl = firstVideo.url;
+        }
       }
 
       if (!payload.videoThumbnailUrl) {
@@ -277,8 +291,8 @@ export default function Projects() {
       }
 
       if (!payload.afterImageUrl) {
-        const secondImage = uploadedMedia.filter((item) => item.type === "image")[1];
-        if (secondImage) nextUpdate.afterImageUrl = secondImage.url;
+        const firstImage = uploadedMedia.filter((item) => item.type === "image")[1];
+        if (firstImage) nextUpdate.afterImageUrl = firstImage.url;
       }
 
       if (Object.keys(nextUpdate).length > 0) {
@@ -292,9 +306,10 @@ export default function Projects() {
       resetForm();
       setPendingFiles([]);
       fetchProjects();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save project:", err);
-      alert("Failed to save project");
+      const errMsg = err.response?.data?.error || err.message || "Unknown error";
+      alert(`Error saving project: ${errMsg}`);
     } finally {
       setSaving(false);
     }
@@ -316,6 +331,8 @@ export default function Projects() {
         : "",
       videoUrl: project.videoUrl || "",
       videoThumbnailUrl: project.videoThumbnailUrl || "",
+      youtubeUrl: project.youtubeUrl || "",
+      uploadedVideo: project.uploadedVideo || "",
       beforeImageUrl: project.beforeImageUrl || "",
       afterImageUrl: project.afterImageUrl || "",
       seoTitle: project.seoTitle || "",
@@ -323,6 +340,7 @@ export default function Projects() {
       tags: project.tags ? project.tags.join(", ") : "",
       featuredImageId: project.featuredImageId || project.featuredImage?.id || "",
     });
+    setVideoSource(project.youtubeUrl ? "youtube" : "upload");
     setPendingFiles([]);
     setShowModal(true);
   };
@@ -340,6 +358,8 @@ export default function Projects() {
       completionDate: "",
       videoUrl: "",
       videoThumbnailUrl: "",
+      youtubeUrl: "",
+      uploadedVideo: "",
       beforeImageUrl: "",
       afterImageUrl: "",
       seoTitle: "",
@@ -347,6 +367,7 @@ export default function Projects() {
       tags: "",
       featuredImageId: "",
     });
+    setVideoSource("upload");
   };
 
   const currentMedia = useMemo(() => {
@@ -607,7 +628,7 @@ export default function Projects() {
                         className="hidden"
                         onChange={(e) => {
                           if (e.target.files)
-                            setPendingFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+                            setPendingFiles((prev) => [...prev, ...Array.from(e.target.files || [])]);
                           e.currentTarget.value = "";
                         }}
                       />
@@ -623,7 +644,7 @@ export default function Projects() {
                     onDrop={(e) => {
                       e.preventDefault();
                       setDragActive(false);
-                      if (e.dataTransfer.files.length > 0) {
+                      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                         setPendingFiles((prev) => [...prev, ...Array.from(e.dataTransfer.files)]);
                       }
                     }}
@@ -688,19 +709,58 @@ export default function Projects() {
                   <h4 className="font-semibold text-purple-900 flex items-center gap-1.5">
                     <Video size={16} /> Video & Media Integration
                   </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium mb-1">
-                        Project Video URL (auto-filled from uploads when possible)
+                  <div>
+                    <label className="block text-xs font-medium mb-1">Video Source</label>
+                    <div className="flex gap-4 mb-3">
+                      <label className="flex items-center gap-2 font-medium cursor-pointer">
+                        <input
+                          type="radio"
+                          name="videoSource"
+                          checked={videoSource === "upload"}
+                          onChange={() => setVideoSource("upload")}
+                          className="text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>Upload Video</span>
                       </label>
-                      <input
-                        type="text"
-                        value={formData.videoUrl}
-                        onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                        className="w-full px-3 py-1.5 border rounded-lg bg-white text-xs"
-                        placeholder="https://..."
-                      />
+                      <label className="flex items-center gap-2 font-medium cursor-pointer">
+                        <input
+                          type="radio"
+                          name="videoSource"
+                          checked={videoSource === "youtube"}
+                          onChange={() => setVideoSource("youtube")}
+                          className="text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>YouTube Link</span>
+                      </label>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {videoSource === "upload" ? (
+                      <div>
+                        <label className="block text-xs font-medium mb-1">
+                          Uploaded Video URL (auto-filled when dragging/uploading a video file above)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.uploadedVideo}
+                          onChange={(e) => setFormData({ ...formData, uploadedVideo: e.target.value, videoUrl: e.target.value })}
+                          className="w-full px-3 py-1.5 border rounded-lg bg-white text-xs"
+                          placeholder="e.g. /uploads/projects/myfile.mp4"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-xs font-medium mb-1">YouTube URL</label>
+                        <input
+                          type="text"
+                          value={formData.youtubeUrl}
+                          onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value, videoUrl: e.target.value })}
+                          className="w-full px-3 py-1.5 border rounded-lg bg-white text-xs"
+                          placeholder="e.g. https://www.youtube.com/watch?v=xxxxxxxx"
+                        />
+                      </div>
+                    )}
                     <div>
                       <label className="block text-xs font-medium mb-1">
                         Video Thumbnail Image URL

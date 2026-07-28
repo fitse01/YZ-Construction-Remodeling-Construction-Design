@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
-import { FolderOpen, FileText, Image, Video, Mail, PlusCircle, ArrowUpRight, CheckCircle2, Clock } from 'lucide-react'
+import { FolderOpen, FileText, Image, Mail, PlusCircle, ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 interface Stats {

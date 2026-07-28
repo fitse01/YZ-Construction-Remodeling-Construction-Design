@@ -154,6 +154,8 @@ export const createProject = async (req: Request, res: Response) => {
       tags = [],
       videoUrl,
       videoThumbnailUrl,
+      youtubeUrl,
+      uploadedVideo,
       beforeImageUrl,
       afterImageUrl,
       featuredImageId,
@@ -182,6 +184,8 @@ export const createProject = async (req: Request, res: Response) => {
         tags: Array.isArray(tags) ? tags : [],
         videoUrl: videoUrl || null,
         videoThumbnailUrl: videoThumbnailUrl || null,
+        youtubeUrl: youtubeUrl || null,
+        uploadedVideo: uploadedVideo || null,
         beforeImageUrl: beforeImageUrl || null,
         afterImageUrl: afterImageUrl || null,
         featuredImageId: featuredImageId || null,
@@ -223,6 +227,8 @@ export const updateProject = async (req: Request, res: Response) => {
       tags,
       videoUrl,
       videoThumbnailUrl,
+      youtubeUrl,
+      uploadedVideo,
       beforeImageUrl,
       afterImageUrl,
       seoTitle,
@@ -245,6 +251,8 @@ export const updateProject = async (req: Request, res: Response) => {
     if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
     if (videoUrl !== undefined) updateData.videoUrl = videoUrl;
     if (videoThumbnailUrl !== undefined) updateData.videoThumbnailUrl = videoThumbnailUrl;
+    if (youtubeUrl !== undefined) updateData.youtubeUrl = youtubeUrl;
+    if (uploadedVideo !== undefined) updateData.uploadedVideo = uploadedVideo;
     if (beforeImageUrl !== undefined) updateData.beforeImageUrl = beforeImageUrl;
     if (afterImageUrl !== undefined) updateData.afterImageUrl = afterImageUrl;
     if (seoTitle !== undefined) updateData.seoTitle = seoTitle;

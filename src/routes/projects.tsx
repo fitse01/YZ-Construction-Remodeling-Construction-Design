@@ -1,17 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, MapPin, PlayCircle, Search } from "lucide-react";
+import { Calendar, MapPin, PlayCircle, Search, X } from "lucide-react";
 import { BeforeAfter } from "@/components/site/BeforeAfter";
 import { PageHero, SiteLayout } from "@/components/site/Layout";
-import kitchen from "@/assets/kitchen.jpg";
-import bathroom from "@/assets/bathroom.jpg";
-import restaurant from "@/assets/restaurant.jpg";
-import commercial from "@/assets/commercial.jpg";
-import exterior from "@/assets/exterior.jpg";
-import interior from "@/assets/interior.jpg";
-import before from "@/assets/before.jpg";
-import after from "@/assets/after.jpg";
-import carpentry from "@/assets/carpentery.jpeg";
 
 interface ApiProject {
   id: string;
@@ -22,6 +13,8 @@ interface ApiProject {
   completionDate?: string | null;
   videoUrl?: string | null;
   videoThumbnailUrl?: string | null;
+  youtubeUrl?: string | null;
+  uploadedVideo?: string | null;
   beforeImageUrl?: string | null;
   afterImageUrl?: string | null;
   images?: Array<{ url: string; thumbnailUrl?: string | null }>;
@@ -39,6 +32,8 @@ type ProjectCard = {
   description: string;
   videoUrl?: string | null;
   videoThumbnailUrl?: string | null;
+  youtubeUrl?: string | null;
+  uploadedVideo?: string | null;
   beforeImageUrl?: string | null;
   afterImageUrl?: string | null;
 };
@@ -58,7 +53,7 @@ export const Route = createFileRoute("/projects")({
         content: "Portfolio of residential and commercial builds across the DMV.",
       },
       { property: "og:url", content: "/projects" },
-      { property: "og:image", content: kitchen },
+      { property: "og:image", content: "/og-image.jpg" },
     ],
     links: [{ rel: "canonical", href: "/projects" }],
   }),
@@ -76,15 +71,21 @@ const categories = [
   "Furniture & Carpentry",
 ] as const;
 
-const catImageMap: Record<string, string> = {
-  KITCHEN: kitchen,
-  BATHROOM: bathroom,
-  RESTAURANT: restaurant,
-  COMMERCIAL: commercial,
-  EXTERIOR: exterior,
-  RESIDENTIAL: interior,
-  INTERIOR: interior,
-  FURNITURE_CARPENTRY: carpentry,
+const getYouTubeThumbnail = (url: string | null | undefined) => {
+  if (!url) return null;
+  try {
+    let videoId = "";
+    if (url.includes("watch?v=")) {
+      videoId = url.split("watch?v=")[1]?.split("&")[0] || "";
+    } else if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1]?.split("?")[0] || "";
+    } else if (url.includes("youtube.com/embed/")) {
+      videoId = url.split("youtube.com/embed/")[1]?.split("?")[0] || "";
+    }
+    return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+  } catch (e) {
+    return null;
+  }
 };
 
 const categoryLabel = (category: string) =>
@@ -98,6 +99,7 @@ function Projects() {
   const [search, setSearch] = useState("");
   const [projects, setProjects] = useState<ApiProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState<ProjectCard | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -119,11 +121,15 @@ function Projects() {
 
   const cards = useMemo<ProjectCard[]>(() => {
     return projects.map((project) => {
+      const ytThumbnail = project.youtubeUrl
+        ? getYouTubeThumbnail(project.youtubeUrl)
+        : (project.videoUrl ? getYouTubeThumbnail(project.videoUrl) : null);
       const image =
         project.featuredImage?.url ||
         project.images?.[0]?.url ||
-        catImageMap[project.category] ||
-        kitchen;
+        project.videoThumbnailUrl ||
+        ytThumbnail ||
+        "/placeholder-project.jpg";
 
       return {
         id: project.id,
@@ -137,6 +143,8 @@ function Projects() {
         description: project.description,
         videoUrl: project.videoUrl,
         videoThumbnailUrl: project.videoThumbnailUrl,
+        youtubeUrl: project.youtubeUrl,
+        uploadedVideo: project.uploadedVideo,
         beforeImageUrl: project.beforeImageUrl,
         afterImageUrl: project.afterImageUrl,
       };
@@ -264,8 +272,8 @@ function Projects() {
           {beforeAfterProject ? (
             <div className="mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr] items-center">
               <BeforeAfter
-                before={beforeAfterProject.beforeImageUrl || before}
-                after={beforeAfterProject.afterImageUrl || after}
+                before={beforeAfterProject.beforeImageUrl || ""}
+                after={beforeAfterProject.afterImageUrl || ""}
                 alt={`${beforeAfterProject.title} renovation`}
               />
               <div>
@@ -313,10 +321,10 @@ function Projects() {
                 const poster = project.videoThumbnailUrl || project.image;
 
                 return (
-                  <a
+                  <button
                     key={project.id}
-                    href={project.videoUrl || "#"}
-                    className="group relative aspect-video rounded-2xl overflow-hidden"
+                    onClick={() => setActiveVideo(project)}
+                    className="group relative aspect-video rounded-2xl overflow-hidden text-left w-full cursor-pointer focus:outline-none"
                   >
                     <img
                       src={poster}
@@ -327,7 +335,7 @@ function Projects() {
                     <div className="absolute inset-0 bg-black/40 grid place-items-center">
                       <PlayCircle className="w-14 h-14 text-white drop-shadow-lg" />
                     </div>
-                  </a>
+                  </button>
                 );
               })}
             </div>
@@ -338,6 +346,55 @@ function Projects() {
           )}
         </div>
       </section>
+
+      {activeVideo && (
+        <div
+          onClick={() => setActiveVideo(null)}
+          className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-black rounded-2xl max-w-4xl w-full aspect-video shadow-2xl overflow-hidden border border-neutral-800"
+          >
+            <button
+              onClick={() => setActiveVideo(null)}
+              className="absolute top-4 right-4 z-[1000] bg-black/60 text-white rounded-full p-2 hover:bg-black/85 hover:scale-105 transition shadow-lg"
+              aria-label="Close video player"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {activeVideo.youtubeUrl || (activeVideo.videoUrl && (activeVideo.videoUrl.includes("youtube.com") || activeVideo.videoUrl.includes("youtu.be"))) ? (
+              <iframe
+                src={(() => {
+                  const ytUrl = activeVideo.youtubeUrl || activeVideo.videoUrl || "";
+                  let videoId = "";
+                  if (ytUrl.includes("watch?v=")) {
+                    videoId = ytUrl.split("watch?v=")[1]?.split("&")[0] || "";
+                  } else if (ytUrl.includes("youtu.be/")) {
+                    videoId = ytUrl.split("youtu.be/")[1]?.split("?")[0] || "";
+                  } else if (ytUrl.includes("youtube.com/embed/")) {
+                    return ytUrl;
+                  }
+                  return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                })()}
+                title={activeVideo.title}
+                className="w-full h-full border-none"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={activeVideo.uploadedVideo || activeVideo.videoUrl || ""}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+                poster={activeVideo.videoThumbnailUrl || activeVideo.image}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       <section className="section">
         <div className="container-x">

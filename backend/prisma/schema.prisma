@@ -81,6 +81,8 @@ model Project {
   tags            String[]
   videoUrl        String?
   videoThumbnailUrl String?
+  youtubeUrl      String?
+  uploadedVideo   String?
   beforeImageUrl  String?
   afterImageUrl   String?
   seoTitle        String?

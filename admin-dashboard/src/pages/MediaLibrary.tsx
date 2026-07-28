@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '../components/Sidebar'
-import { Image, Video, Upload, Search, Trash2, Copy, Check, Folder, FileText } from 'lucide-react'
+import { Image, Video, Upload, Search, Trash2, Copy, Check, Folder } from 'lucide-react'
 
 interface MediaItem {
   id: string
@@ -106,13 +106,13 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
-      <div className="flex-1 p-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="flex-1 p-4 md:p-8 pt-20 md:pt-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Media Library</h1>
             <p className="text-gray-600 mt-1">Upload, search, filter, and reuse media files across your website</p>
           </div>
-          <label className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg cursor-pointer transition font-medium text-sm shadow">
+          <label className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg cursor-pointer transition font-medium text-sm shadow w-full sm:w-auto">
             <Upload size={18} />
             <span>{uploading ? 'Uploading...' : 'Upload Media'}</span>
             <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={uploading} />
@@ -120,8 +120,8 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
         </div>
 
         {/* Filters and Folders */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto">
             {folders.map(f => (
               <button
                 key={f.id}
@@ -138,21 +138,21 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
               <input
                 type="text"
                 placeholder="Search file name..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9 pr-4 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="pl-9 pr-4 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             </div>
             <select
               value={activeType}
               onChange={e => setActiveType(e.target.value)}
-              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="all">All Types</option>
               <option value="image">Images</option>

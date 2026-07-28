@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import logo from "../../assets/logo.png";
 
-const links = [
+interface NavLink {
+  to: string;
+  label: string;
+  adminOnly?: boolean;
+}
+
+const links: NavLink[] = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/services", label: "Services" },
@@ -11,7 +17,7 @@ const links = [
   { to: "/testimonials", label: "Testimonials" },
   { to: "/contact", label: "Contact" },
   { to: "/login", label: "Login", adminOnly: true },
-] as const;
+];
 
 interface SiteSettings {
   companyPhone?: string;

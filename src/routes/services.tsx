@@ -2,12 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ChevronRight } from "lucide-react";
 import { SiteLayout, PageHero } from "@/components/site/Layout";
 import { useEffect, useState } from "react";
-import kitchen from "@/assets/kitchen.jpg";
-import bathroom from "@/assets/bathroom.jpg";
-import restaurant from "@/assets/restaurant.jpg";
-import commercial from "@/assets/commercial.jpg";
-import exterior from "@/assets/exterior.jpg";
-import interior from "@/assets/interior.jpg";
 
 interface Service {
   id: string;
@@ -21,6 +15,7 @@ interface Service {
   coverImage?: {
     url: string;
   } | null;
+  media?: Array<{ url: string; type: string }> | null;
 }
 
 export const Route = createFileRoute("/services")({
@@ -43,16 +38,6 @@ export const Route = createFileRoute("/services")({
   }),
   component: Services,
 });
-
-const fallbackImages: Record<string, string> = {
-  KITCHEN: kitchen,
-  BATHROOM: bathroom,
-  RESTAURANT: restaurant,
-  COMMERCIAL: commercial,
-  EXTERIOR: exterior,
-  WHOLE_HOME: interior,
-  CARPENTRY: interior,
-};
 
 const trades = [
   ["Interior Design", "Selections, drawings, and full FF&E."],
@@ -130,7 +115,10 @@ function Services() {
 
           {services.map((service, index) => {
             const imageSrc =
-              service.coverImage?.url || fallbackImages[service.category] || interior;
+              service.coverImage?.url ||
+              service.media?.find((m) => m.type === "image")?.url ||
+              service.media?.[0]?.url ||
+              "/placeholder-service.jpg";
             const bullets =
               service.features && service.features.length > 0
                 ? service.features
