@@ -92,6 +92,7 @@ export const uploadMediaFile = async (req: Request, res: Response) => {
         thumbnailUrl: thumbnailUrl || relativeUrl,
         projectId: req.body.projectId || null,
         serviceId: req.body.serviceId || null,
+        journalId: req.body.journalId || null,
       },
     });
 

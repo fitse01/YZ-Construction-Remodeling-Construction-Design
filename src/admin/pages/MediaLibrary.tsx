@@ -112,11 +112,21 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
             <h1 className="text-3xl font-bold text-gray-900">Media Library</h1>
             <p className="text-gray-600 mt-1">Upload, search, filter, and reuse media files across your website</p>
           </div>
-          <label className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg cursor-pointer transition font-medium text-sm shadow w-full sm:w-auto">
+          <label
+            htmlFor="library-file-input"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg cursor-pointer transition font-medium text-sm shadow w-full sm:w-auto"
+          >
             <Upload size={18} />
             <span>{uploading ? 'Uploading...' : 'Upload Media'}</span>
-            <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={uploading} />
           </label>
+          <input
+            id="library-file-input"
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileUpload}
+            disabled={uploading}
+          />
         </div>
 
         {/* Filters and Folders */}

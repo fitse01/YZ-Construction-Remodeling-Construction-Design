@@ -1,0 +1,199 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import {
+  Layout,
+  FolderOpen,
+  MessageSquare,
+  LogOut,
+  FileText,
+  Image,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+  X,
+  Settings,
+  User,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { useState } from "react";
+
+const Sidebar = () => {
+  const routerState = useRouterState();
+  const { user, logout } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    content: true,
+    media: false,
+    communication: true,
+    website: false,
+    account: false,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const navItems = [{ path: "/admin/dashboard", icon: Layout, label: "Dashboard", section: null }];
+
+  const contentItems = [
+    { path: "/admin/about", icon: User, label: "About CMS" },
+    { path: "/admin/services", icon: FileText, label: "Services" },
+    { path: "/admin/projects", icon: FolderOpen, label: "Projects" },
+    { path: "/admin/journal", icon: FileText, label: "Journal" },
+    { path: "/admin/testimonials", icon: MessageSquare, label: "Testimonials" },
+    { path: "/admin/gallery", icon: Image, label: "Gallery" },
+  ];
+  const messageItems = [{ path: "/admin/messages", icon: MessageSquare, label: "Message" }];
+  const accountItems = [{ path: "/admin/settings", icon: Settings, label: "Settings" }];
+
+  const isActive = (path: string) =>
+    routerState.location.pathname === path || routerState.location.pathname.startsWith(path + "/");
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-4 left-4 z-40 p-2 bg-gray-900 text-white rounded-lg md:hidden shadow-lg border border-gray-700 hover:bg-gray-800 transition-colors"
+        aria-label="Toggle sidebar"
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
+        />
+      )}
+
+      <aside
+        className={`w-64 bg-gray-900 text-white min-h-screen flex flex-col shrink-0 transition-transform duration-300 md:translate-x-0 ${
+          isOpen
+            ? "translate-x-0 fixed inset-y-0 left-0 z-50"
+            : "-translate-x-full fixed inset-y-0 left-0 z-50 md:relative md:flex"
+        }`}
+      >
+        <div className="p-6 border-b border-gray-700">
+          <h1 className="text-xl font-bold">YZ Construction</h1>
+          <p className="text-gray-400 text-sm mt-1">Admin Dashboard</p>
+        </div>
+
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <ul className="space-y-2">
+            {/* Dashboard */}
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      isActive(item.path)
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:bg-gray-800"
+                    }`}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+
+            {/* Content Section */}
+            <li>
+              <button
+                onClick={() => toggleSection("content")}
+                className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <FileText size={20} />
+                  <span>Content</span>
+                </div>
+                {expandedSections.content ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </button>
+              {expandedSections.content && (
+                <ul className="mt-2 ml-4 space-y-1">
+                  {contentItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <li key={item.path}>
+                        <Link
+                          to={item.path}
+                          className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm ${
+                            isActive(item.path)
+                              ? "bg-blue-600 text-white"
+                              : "text-gray-400 hover:bg-gray-800"
+                          }`}
+                        >
+                          <Icon size={16} />
+                          <span>{item.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+
+            {/*message section*/}
+            {messageItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      isActive(item.path)
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:bg-gray-800"
+                    }`}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+
+            {/*account section*/}
+            {accountItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      isActive(item.path)
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:bg-gray-800"
+                    }`}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="p-4 border-t border-gray-700">
+          <div className="mb-4">
+            <p className="text-sm text-gray-400">Logged in as:</p>
+            <p className="text-sm font-medium">{user?.name}</p>
+            <p className="text-xs text-gray-500">{user?.email}</p>
+          </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-lg text-gray-300 hover:bg-gray-800 transition-colors"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+};
+
+export default Sidebar;

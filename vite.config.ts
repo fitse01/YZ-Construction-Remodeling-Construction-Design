@@ -1,12 +1,23 @@
-// @lovable.dev/vite-tanstack-config already includes the following  do NOT add them manually
-// or the app will break with duplicate plugins:
-//   - TanStack devtools (dev-only, first), tanstackStart, viteReact, tailwindcss, tsConfigPaths,
-//     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
-//     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
+// Silence the deprecated vite-tsconfig-paths warning printed during config loading
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('vite-tsconfig-paths')) {
+    return;
+  }
+  originalWarn(...args);
+};
+
+const originalLog = console.log;
+console.log = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('vite-tsconfig-paths')) {
+    return;
+  }
+  originalLog(...args);
+};
+
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig({
+const rawConfig = defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
@@ -17,6 +28,9 @@ export default defineConfig({
     preset: "node-server",
   },
   vite: {
+    resolve: {
+      tsconfigPaths: true,
+    },
     server: {
       proxy: {
         '/api': {
@@ -33,3 +47,26 @@ export default defineConfig({
     },
   },
 });
+
+// Intercept and remove the deprecated vite-tsconfig-paths plugin if registered
+const config = typeof rawConfig === 'function'
+  ? async (...args: any[]) => {
+      const resolved = await (rawConfig as any)(...args);
+      if (resolved && resolved.plugins) {
+        resolved.plugins = resolved.plugins.filter((plugin: any) => {
+          return !plugin || (plugin.name !== 'vite:tsconfig-paths' && plugin.name !== 'tsconfig-paths');
+        });
+      }
+      return resolved;
+    }
+  : (() => {
+      const resolved = rawConfig as any;
+      if (resolved && resolved.plugins) {
+        resolved.plugins = resolved.plugins.filter((plugin: any) => {
+          return !plugin || (plugin.name !== 'vite:tsconfig-paths' && plugin.name !== 'tsconfig-paths');
+        });
+      }
+      return resolved;
+    })();
+
+export default config;

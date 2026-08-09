@@ -71,7 +71,7 @@ const categories = [
   "Furniture & Carpentry",
 ] as const;
 
-const getYouTubeThumbnail = (url: string | null | undefined) => {
+const getYouTubeVideoId = (url: string | null | undefined) => {
   if (!url) return null;
   try {
     let videoId = "";
@@ -82,10 +82,15 @@ const getYouTubeThumbnail = (url: string | null | undefined) => {
     } else if (url.includes("youtube.com/embed/")) {
       videoId = url.split("youtube.com/embed/")[1]?.split("?")[0] || "";
     }
-    return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+    return videoId || null;
   } catch (e) {
     return null;
   }
+};
+
+const getYouTubeThumbnail = (url: string | null | undefined) => {
+  const videoId = getYouTubeVideoId(url);
+  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
 };
 
 const categoryLabel = (category: string) =>
@@ -123,7 +128,9 @@ function Projects() {
     return projects.map((project) => {
       const ytThumbnail = project.youtubeUrl
         ? getYouTubeThumbnail(project.youtubeUrl)
-        : (project.videoUrl ? getYouTubeThumbnail(project.videoUrl) : null);
+        : project.videoUrl
+          ? getYouTubeThumbnail(project.videoUrl)
+          : null;
       const image =
         project.featuredImage?.url ||
         project.images?.[0]?.url ||
@@ -151,8 +158,20 @@ function Projects() {
     });
   }, [projects]);
 
-  const filtered = useMemo(() => {
-    return cards.filter((project) => {
+  const imageProjects = useMemo(() => {
+    return cards.filter(
+      (project) => !project.youtubeUrl && !project.uploadedVideo && !project.videoUrl,
+    );
+  }, [cards]);
+
+  const videoProjects = useMemo(() => {
+    return cards.filter(
+      (project) => project.youtubeUrl || project.uploadedVideo || project.videoUrl,
+    );
+  }, [cards]);
+
+  const filteredImageProjects = useMemo(() => {
+    return imageProjects.filter((project) => {
       const matchesCategory =
         selectedCategory === "All" ||
         project.category.toLowerCase().includes(selectedCategory.toLowerCase());
@@ -163,15 +182,10 @@ function Projects() {
 
       return matchesCategory && matchesSearch;
     });
-  }, [cards, search, selectedCategory]);
+  }, [imageProjects, search, selectedCategory]);
 
   const beforeAfterProject = useMemo(
     () => cards.find((project) => project.beforeImageUrl && project.afterImageUrl) || null,
-    [cards],
-  );
-
-  const videoProjects = useMemo(
-    () => cards.filter((project) => project.videoUrl || project.videoThumbnailUrl).slice(0, 3),
     [cards],
   );
 
@@ -217,9 +231,9 @@ function Projects() {
         <div className="container-x">
           {loading ? (
             <div className="text-center py-16 text-muted-foreground">Loading portfolio...</div>
-          ) : filtered.length > 0 ? (
+          ) : filteredImageProjects.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((project) => (
+              {filteredImageProjects.map((project) => (
                 <article
                   key={project.id}
                   className="card-lift group overflow-hidden rounded-2xl border border-border bg-card"
@@ -316,26 +330,66 @@ function Projects() {
           </div>
 
           {videoProjects.length > 0 ? (
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {videoProjects.map((project) => {
-                const poster = project.videoThumbnailUrl || project.image;
-
                 return (
-                  <button
+                  <article
                     key={project.id}
-                    onClick={() => setActiveVideo(project)}
-                    className="group relative aspect-video rounded-2xl overflow-hidden text-left w-full cursor-pointer focus:outline-none"
+                    className="card-lift group overflow-hidden rounded-2xl border border-border bg-card flex flex-col"
                   >
-                    <img
-                      src={poster}
-                      alt={`${project.title} video thumbnail`}
-                      loading="lazy"
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-black/40 grid place-items-center">
-                      <PlayCircle className="w-14 h-14 text-white drop-shadow-lg" />
+                    <button
+                      onClick={() => setActiveVideo(project)}
+                      className="group relative aspect-video overflow-hidden text-left w-full cursor-pointer focus:outline-none rounded-t-2xl"
+                    >
+                      {project.videoThumbnailUrl || project.youtubeUrl ? (
+                        <img
+                          src={
+                            project.videoThumbnailUrl ||
+                            getYouTubeThumbnail(project.youtubeUrl) ||
+                            ""
+                          }
+                          alt={`${project.title} video thumbnail`}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            const videoId = getYouTubeVideoId(project.youtubeUrl);
+                            if (videoId) {
+                              e.currentTarget.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-800 to-slate-600 flex flex-col items-center justify-center text-white/90">
+                          <PlayCircle className="w-12 h-12 mb-2" />
+                          <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+                            Video Walk-through
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 grid place-items-center group-hover:bg-black/50 transition">
+                        <PlayCircle className="w-14 h-14 text-white drop-shadow-lg group-hover:scale-110 transition duration-300" />
+                      </div>
+                    </button>
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 text-xs font-mono tracking-[0.2em] uppercase text-primary">
+                          <span>{project.category}</span>
+                        </div>
+                        <h3 className="mt-3 text-xl font-display font-semibold">{project.title}</h3>
+                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                          {project.description}
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-border flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5" /> {project.location}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" /> {project.year}
+                        </span>
+                      </div>
                     </div>
-                  </button>
+                  </article>
                 );
               })}
             </div>
@@ -350,7 +404,7 @@ function Projects() {
       {activeVideo && (
         <div
           onClick={() => setActiveVideo(null)}
-          className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-0 bg-black/90 z-999 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -358,13 +412,16 @@ function Projects() {
           >
             <button
               onClick={() => setActiveVideo(null)}
-              className="absolute top-4 right-4 z-[1000] bg-black/60 text-white rounded-full p-2 hover:bg-black/85 hover:scale-105 transition shadow-lg"
+              className="absolute top-4 right-4 z-1000 bg-black/60 text-white rounded-full p-2 hover:bg-black/85 hover:scale-105 transition shadow-lg"
               aria-label="Close video player"
             >
               <X className="w-6 h-6" />
             </button>
 
-            {activeVideo.youtubeUrl || (activeVideo.videoUrl && (activeVideo.videoUrl.includes("youtube.com") || activeVideo.videoUrl.includes("youtu.be"))) ? (
+            {activeVideo.youtubeUrl ||
+            (activeVideo.videoUrl &&
+              (activeVideo.videoUrl.includes("youtube.com") ||
+                activeVideo.videoUrl.includes("youtu.be"))) ? (
               <iframe
                 src={(() => {
                   const ytUrl = activeVideo.youtubeUrl || activeVideo.videoUrl || "";
@@ -389,7 +446,12 @@ function Projects() {
                 controls
                 autoPlay
                 className="w-full h-full object-contain"
-                poster={activeVideo.videoThumbnailUrl || activeVideo.image}
+                poster={
+                  activeVideo.videoThumbnailUrl ||
+                  (activeVideo.youtubeUrl
+                    ? getYouTubeThumbnail(activeVideo.youtubeUrl) || undefined
+                    : undefined)
+                }
               />
             )}
           </div>

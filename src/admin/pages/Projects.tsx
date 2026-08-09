@@ -13,7 +13,7 @@ import {
   Sparkles,
   Upload,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -106,6 +106,81 @@ export default function Projects() {
     setPreviewUrls(urls);
     return () => urls.forEach((url) => URL.revokeObjectURL(url));
   }, [pendingFiles]);
+
+  const appendPendingFiles = (files: FileList | File[]) => {
+    setPendingFiles((prev) => [...prev, ...Array.from(files)]);
+  };
+
+  const uploadProjectAsset = async (projectId: string, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("projectId", projectId);
+
+    const response = await axios.post(`${API_BASE}/api/media/upload/projects`, formData, {
+      withCredentials: true,
+    });
+
+    return response.data as ProjectMedia;
+  };
+
+  const createVideoThumbnailFile = async (file: File) => {
+    if (typeof document === "undefined") return null;
+
+    return new Promise<File | null>((resolve) => {
+      const objectUrl = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      const cleanup = () => URL.revokeObjectURL(objectUrl);
+
+      video.preload = "metadata";
+      video.muted = true;
+      video.playsInline = true;
+      video.src = objectUrl;
+
+      const fail = () => {
+        cleanup();
+        resolve(null);
+      };
+
+      video.onloadedmetadata = () => {
+        const seekTo = Math.min(0.1, Number.isFinite(video.duration) ? video.duration / 2 : 0.1);
+
+        video.currentTime = seekTo;
+      };
+
+      video.onerror = fail;
+
+      video.onseeked = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const width = video.videoWidth || 1280;
+          const height = video.videoHeight || 720;
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const context = canvas.getContext("2d");
+          if (!context) {
+            fail();
+            return;
+          }
+
+          context.drawImage(video, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            cleanup();
+            if (!blob) {
+              resolve(null);
+              return;
+            }
+
+            const thumbnailName = `${file.name.replace(/\.[^.]+$/, "")}-thumbnail.jpg`;
+            resolve(new File([blob], thumbnailName, { type: "image/jpeg" }));
+          }, "image/jpeg", 0.85);
+        } catch (error) {
+          fail();
+        }
+      };
+    });
+  };
 
   const fetchProjects = async () => {
     try {
@@ -215,36 +290,27 @@ export default function Projects() {
     } catch (err) {
       console.error("Failed to delete media:", err);
       alert("Failed to delete media");
-    }
-  };
+        const responseData = await uploadProjectAsset(projectId, file);
 
-  const setFeaturedImage = async (projectId: string, featuredImageId: string) => {
-    try {
-      await axios.put(
-        `${API_BASE}/api/projects/${projectId}`,
-        { featuredImageId },
-        { withCredentials: true },
-      );
-      fetchProjects();
-      if (editingProject?.id === projectId) {
-        await refreshEditingProject(projectId);
-        setFormData((prev) => ({ ...prev, featuredImageId }));
+        if (responseData) {
+          uploaded.push(responseData);
+        }
       }
-    } catch (err) {
-      console.error("Failed to set featured image:", err);
-      alert("Failed to set featured image");
+    } finally {
+      setUploadingMedia(false);
+      setUploadProgress(0);
     }
+
+    return uploaded;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  const uploadGeneratedVideoThumbnail = async (projectId: string, videoFile: File) => {
+    const thumbnailFile = await createVideoThumbnailFile(videoFile);
+    if (!thumbnailFile) return null;
 
-    try {
-      const payload = {
-        ...formData,
-        tags: formData.tags
-          .split(",")
+    const thumbnailMedia = await uploadProjectAsset(projectId, thumbnailFile);
+    return thumbnailMedia.url;
+  };
           .map((tag) => tag.trim())
           .filter(Boolean),
         youtubeUrl: videoSource === "youtube" ? formData.youtubeUrl : "",
@@ -280,9 +346,14 @@ export default function Projects() {
         }
       }
 
-      if (!payload.videoThumbnailUrl) {
-        const firstImage = uploadedMedia.find((item) => item.type === "image");
-        if (firstImage) nextUpdate.videoThumbnailUrl = firstImage.thumbnailUrl || firstImage.url;
+      if (!payload.videoThumbnailUrl && videoSource === "upload") {
+        const sourceVideoFile = pendingFiles.find((file) => file.type.startsWith("video/"));
+        if (sourceVideoFile) {
+          const generatedThumbnailUrl = await uploadGeneratedVideoThumbnail(projectId, sourceVideoFile);
+          if (generatedThumbnailUrl) {
+            nextUpdate.videoThumbnailUrl = generatedThumbnailUrl;
+          }
+        }
       }
 
       if (!payload.beforeImageUrl) {
@@ -520,7 +591,7 @@ export default function Projects() {
                 <button
                   onClick={() => {
                     setShowChoiceModal(false);
-                    navigate("/services");
+                    navigate({ to: "/admin/services" });
                   }}
                   className="p-4 rounded-xl border-2 border-gray-200 hover:border-gray-400 bg-gray-50 hover:bg-gray-100 text-gray-800 font-bold transition flex flex-col items-center gap-2"
                 >
@@ -618,21 +689,26 @@ export default function Projects() {
                         automatically.
                       </p>
                     </div>
-                    <label className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer">
+                    <label
+                      htmlFor="project-media-file-input"
+                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer"
+                    >
                       <Upload size={16} />
                       <span>Add Files</span>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*,video/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files)
-                            setPendingFiles((prev) => [...prev, ...Array.from(e.target.files || [])]);
-                          e.currentTarget.value = "";
-                        }}
-                      />
                     </label>
+                    <input
+                      id="project-media-file-input"
+                      type="file"
+                      multiple
+                      accept="image/*,video/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          appendPendingFiles(e.target.files);
+                        }
+                        e.target.value = "";
+                      }}
+                    />
                   </div>
 
                   <div
@@ -645,7 +721,7 @@ export default function Projects() {
                       e.preventDefault();
                       setDragActive(false);
                       if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                        setPendingFiles((prev) => [...prev, ...Array.from(e.dataTransfer.files)]);
+                        appendPendingFiles(e.dataTransfer.files);
                       }
                     }}
                     className={`rounded-xl border-2 border-dashed p-6 text-center transition ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-white"}`}
@@ -763,17 +839,55 @@ export default function Projects() {
                     )}
                     <div>
                       <label className="block text-xs font-medium mb-1">
-                        Video Thumbnail Image URL
+                        Video Thumbnail Image
                       </label>
-                      <input
-                        type="text"
-                        value={formData.videoThumbnailUrl}
-                        onChange={(e) =>
-                          setFormData({ ...formData, videoThumbnailUrl: e.target.value })
-                        }
-                        className="w-full px-3 py-1.5 border rounded-lg bg-white text-xs"
-                        placeholder="/uploads/..."
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formData.videoThumbnailUrl}
+                          onChange={(e) =>
+                            setFormData({ ...formData, videoThumbnailUrl: e.target.value })
+                          }
+                          className="flex-1 min-w-0 px-3 py-1.5 border rounded-lg bg-white text-xs"
+                          placeholder="/uploads/..."
+                        />
+                        <label
+                          htmlFor="thumbnail-upload-input"
+                          className="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-gray-700 cursor-pointer transition flex-shrink-0"
+                        >
+                          <Upload size={14} />
+                          <span>Upload</span>
+                        </label>
+                        <input
+                          id="thumbnail-upload-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              const file = e.target.files[0];
+                              const uploadData = new FormData();
+                              uploadData.append("file", file);
+                              // Clear the value so the same file can be uploaded again
+                              e.target.value = "";
+                              try {
+                                const response = await axios.post(
+                                  `${API_BASE}/api/media/upload/projects`,
+                                  uploadData,
+                                  { withCredentials: true }
+                                );
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  videoThumbnailUrl: response.data.url,
+                                }));
+                              } catch (err: any) {
+                                console.error("Failed to upload thumbnail:", err);
+                                alert("Failed to upload thumbnail: " + (err.response?.data?.error || err.message));
+                              }
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -784,28 +898,102 @@ export default function Projects() {
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium mb-1">Before Image URL</label>
-                      <input
-                        type="text"
-                        value={formData.beforeImageUrl}
-                        onChange={(e) =>
-                          setFormData({ ...formData, beforeImageUrl: e.target.value })
-                        }
-                        className="w-full px-3 py-1.5 border rounded-lg bg-white text-xs"
-                        placeholder="/uploads/before.jpg"
-                      />
+                      <label className="block text-xs font-medium mb-1">Before Image</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formData.beforeImageUrl}
+                          onChange={(e) =>
+                            setFormData({ ...formData, beforeImageUrl: e.target.value })
+                          }
+                          className="flex-1 min-w-0 px-3 py-1.5 border rounded-lg bg-white text-xs"
+                          placeholder="/uploads/before.jpg"
+                        />
+                        <label
+                          htmlFor="before-upload-input"
+                          className="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-gray-700 cursor-pointer transition flex-shrink-0"
+                        >
+                          <Upload size={14} />
+                          <span>Upload</span>
+                        </label>
+                        <input
+                          id="before-upload-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              const file = e.target.files[0];
+                              const uploadData = new FormData();
+                              uploadData.append("file", file);
+                              e.target.value = "";
+                              try {
+                                const response = await axios.post(
+                                  `${API_BASE}/api/media/upload/projects`,
+                                  uploadData,
+                                  { withCredentials: true }
+                                );
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  beforeImageUrl: response.data.url,
+                                }));
+                              } catch (err: any) {
+                                console.error("Failed to upload before image:", err);
+                                alert("Failed to upload image: " + (err.response?.data?.error || err.message));
+                              }
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium mb-1">After Image URL</label>
-                      <input
-                        type="text"
-                        value={formData.afterImageUrl}
-                        onChange={(e) =>
-                          setFormData({ ...formData, afterImageUrl: e.target.value })
-                        }
-                        className="w-full px-3 py-1.5 border rounded-lg bg-white text-xs"
-                        placeholder="/uploads/after.jpg"
-                      />
+                      <label className="block text-xs font-medium mb-1">After Image</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formData.afterImageUrl}
+                          onChange={(e) =>
+                            setFormData({ ...formData, afterImageUrl: e.target.value })
+                          }
+                          className="flex-1 min-w-0 px-3 py-1.5 border rounded-lg bg-white text-xs"
+                          placeholder="/uploads/after.jpg"
+                        />
+                        <label
+                          htmlFor="after-upload-input"
+                          className="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-gray-700 cursor-pointer transition flex-shrink-0"
+                        >
+                          <Upload size={14} />
+                          <span>Upload</span>
+                        </label>
+                        <input
+                          id="after-upload-input"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              const file = e.target.files[0];
+                              const uploadData = new FormData();
+                              uploadData.append("file", file);
+                              e.target.value = "";
+                              try {
+                                const response = await axios.post(
+                                  `${API_BASE}/api/media/upload/projects`,
+                                  uploadData,
+                                  { withCredentials: true }
+                                );
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  afterImageUrl: response.data.url,
+                                }));
+                              } catch (err: any) {
+                                console.error("Failed to upload after image:", err);
+                                alert("Failed to upload image: " + (err.response?.data?.error || err.message));
+                              }
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

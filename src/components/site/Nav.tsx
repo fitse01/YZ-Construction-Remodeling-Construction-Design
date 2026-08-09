@@ -65,17 +65,19 @@ export function Nav() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
-          {links.filter(l => !l.adminOnly).map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className="px-3.5 py-2 text-sm font-medium text-foreground/75 hover:text-foreground rounded-full transition-colors"
-              activeProps={{ className: "text-foreground bg-secondary" }}
-              activeOptions={{ exact: l.to === "/" }}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {links
+            .filter((l) => !l.adminOnly)
+            .map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className="px-3.5 py-2 text-sm font-medium text-foreground/75 hover:text-foreground rounded-full transition-colors"
+                activeProps={{ className: "text-foreground bg-secondary" }}
+                activeOptions={{ exact: l.to === "/" }}
+              >
+                {l.label}
+              </Link>
+            ))}
           <Link
             to="/login"
             className="px-3.5 py-2 text-sm font-medium text-foreground/75 hover:text-foreground rounded-full transition-colors"
@@ -86,10 +88,10 @@ export function Nav() {
 
         <div className="hidden lg:flex items-center gap-3">
           <a
-            href={`tel:${siteSettings.companyPhone || '+12407818778'}`}
+            href={`tel:${siteSettings.companyPhone || "+12407818778"}`}
             className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground"
           >
-            <Phone className="w-4 h-4" /> {siteSettings.companyPhone || '(240) 781-8778'}
+            <Phone className="w-4 h-4" /> {siteSettings.companyPhone || "(240) 781-8778"}
           </a>
           <Link to="/contact" className="btn-primary">
             Free Estimate

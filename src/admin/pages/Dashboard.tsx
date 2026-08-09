@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
-import { FolderOpen, FileText, Image, Mail, PlusCircle, ArrowUpRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { FolderOpen, FileText, Image, Mail, PlusCircle, ArrowUpRight, BookOpen } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 
 interface Stats {
   totalProjects: number
@@ -15,6 +15,8 @@ interface Stats {
   unreadMessages: number
   recentMessages: any[]
   recentMedia: any[]
+  totalJournals: number
+  publishedJournals: number
 }
 
 export default function Dashboard() {
@@ -30,6 +32,8 @@ export default function Dashboard() {
     unreadMessages: 0,
     recentMessages: [],
     recentMedia: [],
+    totalJournals: 0,
+    publishedJournals: 0,
   })
   const [loading, setLoading] = useState(true)
 
@@ -39,16 +43,18 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const [projectsRes, servicesRes, messagesRes, mediaRes] = await Promise.all([
+      const [projectsRes, servicesRes, messagesRes, mediaRes, journalsRes] = await Promise.all([
         fetch('/api/projects?limit=100').then(r => r.json()),
         fetch('/api/services?limit=100').then(r => r.json()),
         fetch('/api/messages?limit=10').then(r => r.json()),
         fetch('/api/media?limit=6').then(r => r.json()),
+        fetch('/api/journals?limit=100').then(r => r.json()),
       ])
 
       const projects = projectsRes.projects || []
       const services = servicesRes.services || []
       const mediaList = mediaRes.media || []
+      const journals = journalsRes.journals || []
 
       setStats({
         totalProjects: projects.length,
@@ -62,6 +68,8 @@ export default function Dashboard() {
         unreadMessages: messagesRes.unreadCount || 0,
         recentMessages: messagesRes.messages || [],
         recentMedia: mediaList,
+        totalJournals: journals.length,
+        publishedJournals: journals.filter((j: any) => j.status === 'PUBLISHED').length,
       })
     } catch (err) {
       console.error('Failed to load dashboard stats:', err)
@@ -90,15 +98,15 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              to="/projects"
+              to="/admin/projects"
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow"
             >
               <PlusCircle size={18} />
               <span>New Project</span>
             </Link>
             <Link
-              to="/services"
-              className="flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow"
+              to="/admin/services"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow"
             >
               <PlusCircle size={18} />
               <span>New Service</span>
@@ -107,7 +115,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -141,6 +149,21 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-gray-500">Journal Articles</p>
+                <h3 className="text-3xl font-bold text-gray-900 mt-1">{stats.totalJournals}</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  <span className="text-green-600 font-semibold">{stats.publishedJournals} Published</span> articles
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                <BookOpen size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-sm font-medium text-gray-500">Media Library</p>
                 <h3 className="text-3xl font-bold text-gray-900 mt-1">{stats.totalImages + stats.totalVideos}</h3>
                 <p className="text-xs text-gray-500 mt-1">
@@ -158,11 +181,11 @@ export default function Dashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-500">Messages & Leads</p>
                 <h3 className="text-3xl font-bold text-gray-900 mt-1">{stats.totalMessages}</h3>
-                <p className="text-xs text-orange-600 font-semibold mt-1">
+                <p className="text-xs text-red-600 font-semibold mt-1">
                   {stats.unreadMessages} Unread Inquiry
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
                 <Mail size={24} />
               </div>
             </div>
@@ -178,7 +201,7 @@ export default function Dashboard() {
                 <h2 className="text-lg font-bold text-gray-900">Recent Inquiries</h2>
                 <p className="text-xs text-gray-500">Latest website submissions</p>
               </div>
-              <Link to="/messages" className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
+              <Link to="/admin/messages" className="text-sm text-blue-600 font-semibold hover:underline flex items-center gap-1">
                 View All <ArrowUpRight size={16} />
               </Link>
             </div>
@@ -215,28 +238,28 @@ export default function Dashboard() {
               <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Management</h2>
               <div className="space-y-2.5">
                 <Link
-                  to="/homepage"
+                  to="/admin/homepage"
                   className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition text-sm font-medium text-gray-700 hover:text-blue-600"
                 >
                   <span>Edit Homepage Banner & Copy</span>
                   <ArrowUpRight size={16} />
                 </Link>
                 <Link
-                  to="/services"
+                  to="/admin/services"
                   className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition text-sm font-medium text-gray-700 hover:text-blue-600"
                 >
                   <span>Manage Company Services</span>
                   <ArrowUpRight size={16} />
                 </Link>
                 <Link
-                  to="/media/images"
+                  to="/admin/gallery"
                   className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition text-sm font-medium text-gray-700 hover:text-blue-600"
                 >
                   <span>Upload & Organise Media</span>
                   <ArrowUpRight size={16} />
                 </Link>
                 <Link
-                  to="/settings"
+                  to="/admin/settings"
                   className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition text-sm font-medium text-gray-700 hover:text-blue-600"
                 >
                   <span>Site Phone, Address & Logo</span>

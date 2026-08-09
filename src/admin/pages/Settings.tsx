@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/AuthContext";
 
-const Settings = () => {
+const Settings = ({ hideSidebar = false }: { hideSidebar?: boolean }) => {
   const { user, checkAuth } = useAuth();
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
   const [name, setName] = useState("");
@@ -103,8 +103,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <div className={hideSidebar ? "" : "flex"}>
+      {!hideSidebar && <Sidebar />}
       <main className="flex-1 p-8 bg-gray-50">
         <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
 

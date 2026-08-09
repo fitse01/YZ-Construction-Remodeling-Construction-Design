@@ -9,18 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestimonialsRouteImport } from './routes/testimonials'
+import { Route as TestimonyRouteImport } from './routes/testimony'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TestimonialsIndexRouteImport } from './routes/testimonials.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminTestimonialsRouteImport } from './routes/admin.testimonials'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminServicesRouteImport } from './routes/admin.services'
+import { Route as AdminProjectsRouteImport } from './routes/admin.projects'
+import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
+import { Route as AdminJournalRouteImport } from './routes/admin.journal'
+import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
+import { Route as AdminGalleryRouteImport } from './routes/admin.gallery'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminAboutRouteImport } from './routes/admin.about'
+import { Route as TestimonyJournalIndexRouteImport } from './routes/testimony.journal.index'
+import { Route as TestimonialsJournalIndexRouteImport } from './routes/testimonials.journal.index'
+import { Route as TestimonyJournalIdRouteImport } from './routes/testimony.journal.$id'
+import { Route as TestimonialsJournalSlugRouteImport } from './routes/testimonials.journal.$slug'
 
-const TestimonialsRoute = TestimonialsRouteImport.update({
-  id: '/testimonials',
-  path: '/testimonials',
+const TestimonyRoute = TestimonyRouteImport.update({
+  id: '/testimony',
+  path: '/testimony',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -48,6 +65,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -58,16 +80,114 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TestimonialsIndexRoute = TestimonialsIndexRouteImport.update({
+  id: '/testimonials/',
+  path: '/testimonials/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
+  id: '/testimonials',
+  path: '/testimonials',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProjectsRoute = AdminProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMessagesRoute = AdminMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJournalRoute = AdminJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHomepageRoute = AdminHomepageRouteImport.update({
+  id: '/homepage',
+  path: '/homepage',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGalleryRoute = AdminGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAboutRoute = AdminAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => AdminRoute,
+} as any)
+const TestimonyJournalIndexRoute = TestimonyJournalIndexRouteImport.update({
+  id: '/journal/',
+  path: '/journal/',
+  getParentRoute: () => TestimonyRoute,
+} as any)
+const TestimonialsJournalIndexRoute =
+  TestimonialsJournalIndexRouteImport.update({
+    id: '/testimonials/journal/',
+    path: '/testimonials/journal/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const TestimonyJournalIdRoute = TestimonyJournalIdRouteImport.update({
+  id: '/journal/$id',
+  path: '/journal/$id',
+  getParentRoute: () => TestimonyRoute,
+} as any)
+const TestimonialsJournalSlugRoute = TestimonialsJournalSlugRouteImport.update({
+  id: '/testimonials/journal/$slug',
+  path: '/testimonials/journal/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/testimonials': typeof TestimonialsRoute
+  '/testimony': typeof TestimonyRouteWithChildren
+  '/admin/about': typeof AdminAboutRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/homepage': typeof AdminHomepageRoute
+  '/admin/journal': typeof AdminJournalRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/projects': typeof AdminProjectsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/testimonials': typeof AdminTestimonialsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/testimonials/': typeof TestimonialsIndexRoute
+  '/testimonials/journal/$slug': typeof TestimonialsJournalSlugRoute
+  '/testimony/journal/$id': typeof TestimonyJournalIdRoute
+  '/testimonials/journal/': typeof TestimonialsJournalIndexRoute
+  '/testimony/journal/': typeof TestimonyJournalIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,30 +197,80 @@ export interface FileRoutesByTo {
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/testimonials': typeof TestimonialsRoute
+  '/testimony': typeof TestimonyRouteWithChildren
+  '/admin/about': typeof AdminAboutRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/homepage': typeof AdminHomepageRoute
+  '/admin/journal': typeof AdminJournalRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/projects': typeof AdminProjectsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/testimonials': typeof AdminTestimonialsRoute
+  '/admin': typeof AdminIndexRoute
+  '/testimonials': typeof TestimonialsIndexRoute
+  '/testimonials/journal/$slug': typeof TestimonialsJournalSlugRoute
+  '/testimony/journal/$id': typeof TestimonyJournalIdRoute
+  '/testimonials/journal': typeof TestimonialsJournalIndexRoute
+  '/testimony/journal': typeof TestimonyJournalIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/testimonials': typeof TestimonialsRoute
+  '/testimony': typeof TestimonyRouteWithChildren
+  '/admin/about': typeof AdminAboutRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/gallery': typeof AdminGalleryRoute
+  '/admin/homepage': typeof AdminHomepageRoute
+  '/admin/journal': typeof AdminJournalRoute
+  '/admin/messages': typeof AdminMessagesRoute
+  '/admin/projects': typeof AdminProjectsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/testimonials': typeof AdminTestimonialsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/testimonials/': typeof TestimonialsIndexRoute
+  '/testimonials/journal/$slug': typeof TestimonialsJournalSlugRoute
+  '/testimony/journal/$id': typeof TestimonyJournalIdRoute
+  '/testimonials/journal/': typeof TestimonialsJournalIndexRoute
+  '/testimony/journal/': typeof TestimonyJournalIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
     | '/login'
     | '/projects'
     | '/services'
     | '/sitemap.xml'
-    | '/testimonials'
+    | '/testimony'
+    | '/admin/about'
+    | '/admin/dashboard'
+    | '/admin/gallery'
+    | '/admin/homepage'
+    | '/admin/journal'
+    | '/admin/messages'
+    | '/admin/projects'
+    | '/admin/services'
+    | '/admin/settings'
+    | '/admin/testimonials'
+    | '/admin/'
+    | '/testimonials/'
+    | '/testimonials/journal/$slug'
+    | '/testimony/journal/$id'
+    | '/testimonials/journal/'
+    | '/testimony/journal/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,37 +280,74 @@ export interface FileRouteTypes {
     | '/projects'
     | '/services'
     | '/sitemap.xml'
+    | '/testimony'
+    | '/admin/about'
+    | '/admin/dashboard'
+    | '/admin/gallery'
+    | '/admin/homepage'
+    | '/admin/journal'
+    | '/admin/messages'
+    | '/admin/projects'
+    | '/admin/services'
+    | '/admin/settings'
+    | '/admin/testimonials'
+    | '/admin'
     | '/testimonials'
+    | '/testimonials/journal/$slug'
+    | '/testimony/journal/$id'
+    | '/testimonials/journal'
+    | '/testimony/journal'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
     | '/login'
     | '/projects'
     | '/services'
     | '/sitemap.xml'
-    | '/testimonials'
+    | '/testimony'
+    | '/admin/about'
+    | '/admin/dashboard'
+    | '/admin/gallery'
+    | '/admin/homepage'
+    | '/admin/journal'
+    | '/admin/messages'
+    | '/admin/projects'
+    | '/admin/services'
+    | '/admin/settings'
+    | '/admin/testimonials'
+    | '/admin/'
+    | '/testimonials/'
+    | '/testimonials/journal/$slug'
+    | '/testimony/journal/$id'
+    | '/testimonials/journal/'
+    | '/testimony/journal/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   ProjectsRoute: typeof ProjectsRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  TestimonialsRoute: typeof TestimonialsRoute
+  TestimonyRoute: typeof TestimonyRouteWithChildren
+  TestimonialsIndexRoute: typeof TestimonialsIndexRoute
+  TestimonialsJournalSlugRoute: typeof TestimonialsJournalSlugRoute
+  TestimonialsJournalIndexRoute: typeof TestimonialsJournalIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/testimonials': {
-      id: '/testimonials'
-      path: '/testimonials'
-      fullPath: '/testimonials'
-      preLoaderRoute: typeof TestimonialsRouteImport
+    '/testimony': {
+      id: '/testimony'
+      path: '/testimony'
+      fullPath: '/testimony'
+      preLoaderRoute: typeof TestimonyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -178,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -192,18 +406,178 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/testimonials/': {
+      id: '/testimonials/'
+      path: '/testimonials'
+      fullPath: '/testimonials/'
+      preLoaderRoute: typeof TestimonialsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/testimonials': {
+      id: '/admin/testimonials'
+      path: '/testimonials'
+      fullPath: '/admin/testimonials'
+      preLoaderRoute: typeof AdminTestimonialsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/projects': {
+      id: '/admin/projects'
+      path: '/projects'
+      fullPath: '/admin/projects'
+      preLoaderRoute: typeof AdminProjectsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/messages': {
+      id: '/admin/messages'
+      path: '/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AdminMessagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/journal': {
+      id: '/admin/journal'
+      path: '/journal'
+      fullPath: '/admin/journal'
+      preLoaderRoute: typeof AdminJournalRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/homepage': {
+      id: '/admin/homepage'
+      path: '/homepage'
+      fullPath: '/admin/homepage'
+      preLoaderRoute: typeof AdminHomepageRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/gallery': {
+      id: '/admin/gallery'
+      path: '/gallery'
+      fullPath: '/admin/gallery'
+      preLoaderRoute: typeof AdminGalleryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/about': {
+      id: '/admin/about'
+      path: '/about'
+      fullPath: '/admin/about'
+      preLoaderRoute: typeof AdminAboutRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/testimony/journal/': {
+      id: '/testimony/journal/'
+      path: '/journal'
+      fullPath: '/testimony/journal/'
+      preLoaderRoute: typeof TestimonyJournalIndexRouteImport
+      parentRoute: typeof TestimonyRoute
+    }
+    '/testimonials/journal/': {
+      id: '/testimonials/journal/'
+      path: '/testimonials/journal'
+      fullPath: '/testimonials/journal/'
+      preLoaderRoute: typeof TestimonialsJournalIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/testimony/journal/$id': {
+      id: '/testimony/journal/$id'
+      path: '/journal/$id'
+      fullPath: '/testimony/journal/$id'
+      preLoaderRoute: typeof TestimonyJournalIdRouteImport
+      parentRoute: typeof TestimonyRoute
+    }
+    '/testimonials/journal/$slug': {
+      id: '/testimonials/journal/$slug'
+      path: '/testimonials/journal/$slug'
+      fullPath: '/testimonials/journal/$slug'
+      preLoaderRoute: typeof TestimonialsJournalSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAboutRoute: typeof AdminAboutRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminGalleryRoute: typeof AdminGalleryRoute
+  AdminHomepageRoute: typeof AdminHomepageRoute
+  AdminJournalRoute: typeof AdminJournalRoute
+  AdminMessagesRoute: typeof AdminMessagesRoute
+  AdminProjectsRoute: typeof AdminProjectsRoute
+  AdminServicesRoute: typeof AdminServicesRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTestimonialsRoute: typeof AdminTestimonialsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAboutRoute: AdminAboutRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminGalleryRoute: AdminGalleryRoute,
+  AdminHomepageRoute: AdminHomepageRoute,
+  AdminJournalRoute: AdminJournalRoute,
+  AdminMessagesRoute: AdminMessagesRoute,
+  AdminProjectsRoute: AdminProjectsRoute,
+  AdminServicesRoute: AdminServicesRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminTestimonialsRoute: AdminTestimonialsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface TestimonyRouteChildren {
+  TestimonyJournalIdRoute: typeof TestimonyJournalIdRoute
+  TestimonyJournalIndexRoute: typeof TestimonyJournalIndexRoute
+}
+
+const TestimonyRouteChildren: TestimonyRouteChildren = {
+  TestimonyJournalIdRoute: TestimonyJournalIdRoute,
+  TestimonyJournalIndexRoute: TestimonyJournalIndexRoute,
+}
+
+const TestimonyRouteWithChildren = TestimonyRoute._addFileChildren(
+  TestimonyRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   ProjectsRoute: ProjectsRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  TestimonialsRoute: TestimonialsRoute,
+  TestimonyRoute: TestimonyRouteWithChildren,
+  TestimonialsIndexRoute: TestimonialsIndexRoute,
+  TestimonialsJournalSlugRoute: TestimonialsJournalSlugRoute,
+  TestimonialsJournalIndexRoute: TestimonialsJournalIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

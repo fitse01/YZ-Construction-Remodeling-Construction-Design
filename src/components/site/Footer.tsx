@@ -41,14 +41,17 @@ export function Footer() {
               YZ
             </span>
             <div className="leading-tight">
-              <div className="font-display font-bold text-lg">{siteSettings.companyName || "YZ Construction, LLC"}</div>
+              <div className="font-display font-bold text-lg">
+                {siteSettings.companyName || "YZ Construction, LLC"}
+              </div>
               <div className="text-xs tracking-[0.22em] font-mono uppercase text-white/50">
                 {siteSettings.companyTagline || "Building Better Spaces"}
               </div>
             </div>
           </div>
           <p className="mt-5 text-sm text-white/60 max-w-sm leading-relaxed">
-            {siteSettings.companyDescription || "Family-owned remodeling and construction serving the DMV Maryland, DC, and Northern Virginia. Licensed, insured, and warrantied."}
+            {siteSettings.companyDescription ||
+              "Family-owned remodeling and construction serving the DMV Maryland, DC, and Northern Virginia. Licensed, insured, and warrantied."}
           </p>
           <div className="flex gap-3 mt-6">
             {socialLinks.map(({ Icon, url }, i) => (
@@ -74,6 +77,7 @@ export function Footer() {
               ["About", "/about"],
               ["Services", "/services"],
               ["Projects", "/projects"],
+              ["Journal", "/testimony/journal"],
               ["Testimonials", "/testimonials"],
               ["Contact", "/contact"],
             ].map(([l, to]) => (
@@ -112,16 +116,21 @@ export function Footer() {
               Serving DMV area
             </li>
             <li>
-              <a href={`tel:${siteSettings.companyPhone || '+12407818778'}`} className="flex items-center gap-2.5 hover:text-primary">
-                <Phone className="w-4 h-4 text-primary" /> {siteSettings.companyPhone || '(240) 781-8778'}
+              <a
+                href={`tel:${siteSettings.companyPhone || "+12407818778"}`}
+                className="flex items-center gap-2.5 hover:text-primary"
+              >
+                <Phone className="w-4 h-4 text-primary" />{" "}
+                {siteSettings.companyPhone || "(240) 781-8778"}
               </a>
             </li>
             <li>
               <a
-                href={`mailto:${siteSettings.companyEmail || 'yohanneszewdebayu@gmail.com'}`}
+                href={`mailto:${siteSettings.companyEmail || "yohanneszewdebayu@gmail.com"}`}
                 className="flex items-center gap-2.5 hover:text-primary"
               >
-                <Mail className="w-4 h-4 text-primary" /> {siteSettings.companyEmail || 'yohanneszewdebayu@gmail.com'}
+                <Mail className="w-4 h-4 text-primary" />{" "}
+                {siteSettings.companyEmail || "yohanneszewdebayu@gmail.com"}
               </a>
             </li>
           </ul>
@@ -130,7 +139,10 @@ export function Footer() {
 
       <div className="border-t border-white/10">
         <div className="container-x py-6 flex flex-col md:flex-row gap-3 md:items-center md:justify-between text-xs text-white/45">
-          <p>© {new Date().getFullYear()} {siteSettings.companyName || "YZ Construction, LLC"}. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} {siteSettings.companyName || "YZ Construction, LLC"}. All
+            rights reserved.
+          </p>
           <p>MHIC Licensed · Fully Insured · MD · DC · VA</p>
         </div>
       </div>

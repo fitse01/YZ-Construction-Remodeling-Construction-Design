@@ -29,7 +29,7 @@ interface SiteSettings {
   updatedAt: string
 }
 
-const SiteSettings = () => {
+const SiteSettings = ({ hideSidebar = false }: { hideSidebar?: boolean }) => {
   const [, setSettings] = useState<SiteSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -111,8 +111,8 @@ const SiteSettings = () => {
 
   if (loading) {
     return (
-      <div className="flex">
-        <Sidebar />
+      <div className={hideSidebar ? "" : "flex"}>
+        {!hideSidebar && <Sidebar />}
         <main className="flex-1 p-8">
           <div className="text-gray-600">Loading...</div>
         </main>
@@ -121,8 +121,8 @@ const SiteSettings = () => {
   }
 
   return (
-    <div className="flex">
-      <Sidebar />
+    <div className={hideSidebar ? "" : "flex"}>
+      {!hideSidebar && <Sidebar />}
       <main className="flex-1 p-8 bg-gray-50">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Site Settings</h1>

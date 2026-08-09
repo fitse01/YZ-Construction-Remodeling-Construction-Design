@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../middleware/auth';
 import prisma from '../config/database';
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken, TokenPayload } from '../config/jwt';
+import { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken, TokenPayload } from '../config/jwt';
 import { sendPasswordResetEmail } from '../config/email';
 
 const userSelect = {
@@ -65,14 +65,14 @@ export const login = async (req: AuthRequest, res: Response) => {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -125,7 +125,7 @@ export const refresh = async (req: AuthRequest, res: Response) => {
     res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
@@ -277,20 +277,26 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
 export const me = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+    const token = req.cookies.accessToken;
+    if (!token) {
+      return res.json({ user: null });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-      select: userSelect,
-    });
+    try {
+      const decoded = verifyAccessToken(token);
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: userSelect,
+      });
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      if (!user) {
+        return res.json({ user: null });
+      }
+
+      return res.json({ user });
+    } catch (err) {
+      return res.json({ user: null });
     }
-
-    res.json({ user });
   } catch (error) {
     console.error('Get current user error:', error);
     res.status(500).json({ error: 'Failed to fetch user' });

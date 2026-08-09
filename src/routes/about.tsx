@@ -1,9 +1,31 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck, HardHat, Heart, Award, Leaf, Users } from "lucide-react";
+import { useState, useEffect } from "react";
 import { SiteLayout, PageHero } from "@/components/site/Layout";
 import { Counter } from "@/components/site/Counter";
-import owner from "@/assets/owner.jpeg";
-import team from "@/assets/team.jpg";
+
+interface Media {
+  url: string;
+}
+
+interface AboutContent {
+  ownerName: string;
+  ownerPosition: string;
+  ownerDescription: string;
+  ownerImage?: Media | null;
+  companyStory?: string | null;
+  mission?: string | null;
+  vision?: string | null;
+  values?: string | null;
+}
+
+interface TeamMember {
+  id: string;
+  name: string;
+  position: string;
+  description?: string | null;
+  image?: Media | null;
+}
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -24,25 +46,69 @@ export const Route = createFileRoute("/about")({
 });
 
 function About() {
+  const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [hoveredMember, setHoveredMember] = useState<TeamMember | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [contentRes, teamRes] = await Promise.all([
+          fetch("/api/about/content"),
+          fetch("/api/about/team"),
+        ]);
+
+        if (contentRes.ok) {
+          const contentData = await contentRes.json();
+          setAboutContent(contentData);
+        }
+
+        if (teamRes.ok) {
+          const teamData = await teamRes.json();
+          setTeamMembers(teamData.members || []);
+        }
+      } catch (err) {
+        console.error("Failed to load about page details:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <SiteLayout>
       <PageHero
         eyebrow="About YZ Construction"
         title="A family shop. A craftsman's mindset. A designer's eye."
-        description="Founded by Yohannes Zewde in Silver Spring, MD, YZ Construction has spent over a decade turning tired spaces into homes and businesses people love to walk into."
+        description={
+          aboutContent?.companyStory ||
+          "Founded by Yohannes Zewde in Silver Spring, MD, YZ Construction has spent over a decade turning tired spaces into homes and businesses people love to walk into."
+        }
       />
 
       {/* STORY + OWNER */}
       <section className="section">
         <div className="container-x grid gap-14 lg:grid-cols-2 items-center">
-          <div className="relative aspect-[4/5] rounded-3xl overflow-hidden">
-            <img src={owner} alt="Yohannes Zewde, founder" className="w-full h-full object-cover" />
-            <div className="absolute bottom-6 left-6 right-6 bg-background/95 backdrop-blur rounded-2xl p-5">
-              <div className="text-xs font-mono tracking-[0.22em] uppercase text-primary">
-                Founder & Owner
+          <div className="relative aspect-4/5 rounded-3xl overflow-hidden bg-secondary/30">
+            {aboutContent?.ownerImage?.url ? (
+              <img
+                src={aboutContent.ownerImage.url}
+                alt={aboutContent?.ownerName || "Yohannes Zewde"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-linear-to-br from-neutral-900 via-neutral-700 to-neutral-500" />
+            )}
+            <div className="absolute bottom-6 left-6 right-6 bg-background/95 backdrop-blur rounded-2xl p-5 border border-border/40 shadow-xl">
+              <div className="text-xs font-mono tracking-[0.22em] uppercase text-primary font-semibold">
+                {aboutContent?.ownerPosition || "Founder & Owner"}
               </div>
-              <div className="mt-1 text-xl font-display font-semibold">Yohannes Zewde</div>
-              <div className="text-sm text-muted-foreground">Silver Spring, MD</div>
+              <div className="mt-1 text-xl font-display font-semibold">
+                {aboutContent?.ownerName || "YZ Construction"}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                {aboutContent?.ownerDescription ||
+                  "Owner information is managed in the admin About CMS."}
+              </p>
             </div>
           </div>
           <div>
@@ -51,15 +117,22 @@ function About() {
               From a two-man crew to the DMV's boutique design-build.
             </h2>
             <div className="mt-6 space-y-5 text-lg text-muted-foreground leading-relaxed">
-              <p>
-                Yohannes started YZ Construction with a pickup truck, a set of tools, and a stubborn
-                belief that renovations don't have to be a nightmare. Twelve years later, the trucks
-                are newer and the projects are bigger but the standard is the same.
-              </p>
-              <p>
-                We stay intentionally small. Every project gets a dedicated project manager,
-                in-house crews, and a founder who still walks every job site personally.
-              </p>
+              {aboutContent?.companyStory ? (
+                <p className="whitespace-pre-line leading-relaxed">{aboutContent.companyStory}</p>
+              ) : (
+                <>
+                  <p>
+                    Yohannes started YZ Construction with a pickup truck, a set of tools, and a
+                    stubborn belief that renovations don't have to be a nightmare. Twelve years
+                    later, the trucks are newer and the projects are bigger but the standard is the
+                    same.
+                  </p>
+                  <p>
+                    We stay intentionally small. Every project gets a dedicated project manager,
+                    in-house crews, and a founder who still walks every job site personally.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -71,22 +144,33 @@ function About() {
           {[
             {
               t: "Mission",
-              d: "Deliver residential and commercial construction that respects the client's time, money, and vision.",
+              d:
+                aboutContent?.mission ||
+                "Deliver residential and commercial construction that respects the client's time, money, and vision.",
             },
             {
               t: "Vision",
-              d: "Be the DMV's most trusted boutique builder  the shop people call when it has to be done right.",
+              d:
+                aboutContent?.vision ||
+                "Be the DMV's most trusted boutique builder  the shop people call when it has to be done right.",
             },
             {
               t: "Values",
-              d: "Craft. Communication. Cleanliness. Character. If it's not on the wall, it's on the truck.",
+              d:
+                aboutContent?.values ||
+                "Craft. Communication. Cleanliness. Character. If it's not on the wall, it's on the truck.",
             },
           ].map((c) => (
-            <div key={c.t} className="rounded-2xl bg-card border border-border p-8">
-              <div className="text-xs font-mono tracking-[0.22em] uppercase text-primary">
+            <div
+              key={c.t}
+              className="rounded-2xl bg-card border border-border p-8 hover:border-primary/30 transition duration-300"
+            >
+              <div className="text-xs font-mono tracking-[0.22em] uppercase text-primary font-semibold">
                 {c.t}
               </div>
-              <p className="mt-4 text-lg leading-relaxed">{c.d}</p>
+              <p className="mt-4 text-base md:text-lg leading-relaxed text-muted-foreground">
+                {c.d}
+              </p>
             </div>
           ))}
         </div>
@@ -106,7 +190,7 @@ function About() {
                 <div className="text-5xl md:text-6xl font-bold">
                   <Counter value={n as number} suffix={s as string} />
                 </div>
-                <div className="mt-3 text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground">
+                <div className="mt-3 text-xs font-mono tracking-[0.2em] uppercase text-muted-foreground font-semibold">
                   {l}
                 </div>
               </div>
@@ -125,27 +209,51 @@ function About() {
             </h2>
           </div>
           <div className="mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr] items-center">
-            <img
-              src={team}
-              alt="YZ Construction crew"
-              className="rounded-3xl w-full h-full object-cover aspect-[16/10]"
-              loading="lazy"
-            />
-            <div className="grid gap-4">
-              {[
-                ["Yohannes Zewde", "Founder & Owner"],
-                ["Miguel R.", "Senior Project Manager"],
-                ["Anthony B.", "Lead Carpenter"],
-                ["Elena S.", "Interior Designer"],
-              ].map(([n, r]) => (
-                <div
-                  key={n}
-                  className="flex items-baseline justify-between border-b border-border pb-4"
-                >
-                  <div className="text-lg font-display font-semibold">{n}</div>
-                  <div className="text-sm text-muted-foreground">{r}</div>
-                </div>
-              ))}
+            {/* Interactive Image Crossfade Display */}
+            <div className="relative aspect-16/10 rounded-3xl overflow-hidden bg-secondary shadow-lg">
+              {teamMembers.some((member) => member.image?.url) ? (
+                teamMembers.map((member) =>
+                  member.image?.url ? (
+                    <img
+                      key={member.id}
+                      src={member.image.url}
+                      alt={member.name}
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                        hoveredMember?.id === member.id ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  ) : null,
+                )
+              ) : (
+                <div className="absolute inset-0 bg-linear-to-br from-neutral-900 via-neutral-700 to-neutral-500" />
+              )}
+            </div>
+            {/* Team Members List */}
+            <div className="grid gap-5">
+              {teamMembers.length > 0
+                ? teamMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      onMouseEnter={() => setHoveredMember(member)}
+                      onMouseLeave={() => setHoveredMember(null)}
+                      className="flex flex-col border-b border-border/80 pb-4 group cursor-pointer hover:border-primary/40 transition duration-300"
+                    >
+                      <div className="flex items-baseline justify-between">
+                        <div className="text-lg font-display font-semibold group-hover:text-primary transition duration-300">
+                          {member.name}
+                        </div>
+                        <div className="text-sm text-muted-foreground font-medium">
+                          {member.position}
+                        </div>
+                      </div>
+                      {member.description && (
+                        <p className="text-xs text-muted-foreground mt-1 max-w-md leading-relaxed">
+                          {member.description}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                : null}
             </div>
           </div>
         </div>

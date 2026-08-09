@@ -106,6 +106,7 @@ model Media {
   id          String   @id @default(uuid())
   projectId   String?
   serviceId   String?
+  journalId   String?
   folder      String?  @default("general") // 'projects', 'services', 'hero', 'gallery', 'testimonials', 'blog', 'logo', 'videos', 'documents'
   type        String   // 'image' or 'video'
   filename    String
@@ -124,15 +125,56 @@ model Media {
 
   project     Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   service     Service?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  journal     Journal?  @relation(fields: [journalId], references: [id], onDelete: Cascade)
   featuredIn  Project? @relation("FeaturedImage")
   coverFor    Service?  @relation("ServiceCoverImage")
   heroFor     HomePage? @relation("HomePageHero")
+  featuredInJournal Journal? @relation("JournalFeaturedImage")
+  aboutOwnerContent AboutContent? @relation("AboutOwnerImage")
+  aboutTeamMembers AboutTeamMember[] @relation("AboutTeamMemberImage")
 
   @@map("media")
   @@index([projectId])
   @@index([serviceId])
+  @@index([journalId])
   @@index([folder])
   @@index([type])
+}
+
+model AboutContent {
+  id                String   @id @default(uuid())
+  ownerName         String
+  ownerPosition      String
+  ownerDescription   String   @db.Text
+  ownerImageId      String?   @unique
+  companyStory      String?   @db.Text
+  mission          String?   @db.Text
+  vision           String?   @db.Text
+  values           String?   @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  ownerImage        Media?   @relation("AboutOwnerImage", fields: [ownerImageId], references: [id], onDelete: SetNull)
+
+  @@map("about_content")
+}
+
+model AboutTeamMember {
+  id            String   @id @default(uuid())
+  name          String
+  position      String
+  description   String?  @db.Text
+  imageId       String?
+  displayOrder  Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  image         Media?   @relation("AboutTeamMemberImage", fields: [imageId], references: [id], onDelete: SetNull)
+
+  @@map("about_team_members")
+  @@index([displayOrder])
+  @@index([isActive])
 }
 
 model Message {
@@ -277,4 +319,32 @@ model RefreshToken {
   @@map("refresh_tokens")
   @@index([token])
   @@index([userId])
+}
+
+model Journal {
+  id              String        @id @default(uuid())
+  title           String
+  slug            String        @unique
+  shortDesc       String        @db.Text
+  content         String        @db.Text // Full Rich Text Content
+  category        String        // e.g. 'Guide', 'Case Study', etc.
+  tags            String[]
+  author          String        @default("Yohannes Z.")
+  readingTime     String?       // e.g. '5 min read'
+  publishDate     DateTime?     @default(now())
+  status          ContentStatus @default(DRAFT)
+  isFeatured      Boolean       @default(false)
+  featuredImageId String?       @unique
+  seoTitle        String?
+  seoDescription  String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  media           Media[]
+  featuredImage   Media?        @relation("JournalFeaturedImage", fields: [featuredImageId], references: [id], onDelete: SetNull)
+
+  @@map("journals")
+  @@index([status])
+  @@index([slug])
+  @@index([isFeatured])
 }

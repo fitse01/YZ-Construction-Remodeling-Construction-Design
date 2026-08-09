@@ -602,20 +602,26 @@ const Services = () => {
                         Upload cover and gallery images directly to the VPS.
                       </p>
                     </div>
-                    <label className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer">
+                    <label
+                      htmlFor="service-media-file-input"
+                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer"
+                    >
                       <Upload size={16} />
                       <span>Add Files</span>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files) handleFilesSelected(e.target.files);
-                          e.currentTarget.value = "";
-                        }}
-                      />
                     </label>
+                    <input
+                      id="service-media-file-input"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          handleFilesSelected(e.target.files);
+                        }
+                        e.target.value = "";
+                      }}
+                    />
                   </div>
 
                   <div
