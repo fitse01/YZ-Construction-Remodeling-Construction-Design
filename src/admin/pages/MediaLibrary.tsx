@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Image, Video, Upload, Search, Trash2, Copy, Check, Folder } from 'lucide-react'
 
@@ -16,6 +16,7 @@ interface MediaItem {
 }
 
 export default function MediaLibrary({ initialType = 'all' }: { initialType?: string }) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [mediaList, setMediaList] = useState<MediaItem[]>([])
   const [activeFolder, setActiveFolder] = useState('all')
   const [activeType, setActiveType] = useState(initialType)
@@ -84,6 +85,7 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
       }
     }
 
+    e.target.value = ''
     setUploading(false)
     fetchMedia()
   }
@@ -118,18 +120,20 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
             <h1 className="text-3xl font-bold text-gray-900">Media Library</h1>
             <p className="text-gray-600 mt-1">Upload, search, filter, and reuse media files across your website</p>
           </div>
-          <label
-            htmlFor="library-file-input"
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg cursor-pointer transition font-medium text-sm shadow w-full sm:w-auto"
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-lg cursor-pointer transition font-medium text-sm shadow w-full sm:w-auto"
           >
             <Upload size={18} />
             <span>{uploading ? 'Uploading...' : 'Upload Media'}</span>
-          </label>
+          </button>
           <input
-            id="library-file-input"
+            ref={fileInputRef}
             type="file"
             multiple
-            className="hidden"
+            style={{ display: 'none' }}
             onChange={handleFileUpload}
             disabled={uploading}
           />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import {
   Upload,
@@ -55,6 +55,7 @@ interface MediaItem {
 }
 
 export default function Journal() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [articles, setArticles] = useState<JournalArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -134,21 +135,17 @@ export default function Journal() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('folder', 'journal');
 
-      const response = await axios.post(`${API_BASE}/api/upload/image`, formData, {
+      const response = await axios.post(`${API_BASE}/api/media/upload/journal`, formData, {
         withCredentials: true,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
       });
 
-      const uploadedMedia = response.data.media;
+      const uploadedMedia = response.data;
       setFormData((prev) => ({ ...prev, featuredImageId: uploadedMedia.id }));
       setSelectedImage({
         id: uploadedMedia.id,
         url: uploadedMedia.url,
-        thumbnailUrl: uploadedMedia.thumbnailUrl,
+        thumbnailUrl: uploadedMedia.thumbnailUrl || uploadedMedia.url,
       });
     } catch (error) {
       console.error('Failed to upload image:', error);
@@ -171,6 +168,7 @@ export default function Journal() {
     if (file) {
       handleImageUpload(file);
     }
+    e.target.value = "";
   };
 
   const handleCreateNew = () => {
@@ -551,15 +549,20 @@ export default function Journal() {
                     >
                       <Upload size={14} /> Select from Library
                     </button>
-                    <label className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
+                    >
                       <Upload size={14} /> Upload File
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                    </label>
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={handleFileSelect}
+                    />
                   </div>
                   {uploading && (
                     <span className="text-xs text-blue-600">Uploading...</span>

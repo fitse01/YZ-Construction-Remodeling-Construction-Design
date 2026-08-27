@@ -286,6 +286,17 @@ export const deleteJournal = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "Journal article not found" });
     }
 
+    // Disconnect featuredImage first to prevent circular foreign key constraint errors
+    await prisma.journal.update({
+      where: { id },
+      data: { featuredImageId: null },
+    }).catch(() => null);
+
+    // Delete associated media records
+    await prisma.media.deleteMany({
+      where: { journalId: id },
+    }).catch(() => null);
+
     await prisma.journal.delete({ where: { id } });
     return res.json({ success: true, message: "Journal article deleted successfully" });
   } catch (error) {

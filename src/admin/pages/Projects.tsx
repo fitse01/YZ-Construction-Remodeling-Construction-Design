@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import {
   Plus,
@@ -27,17 +27,17 @@ interface ProjectMedia {
   size: number;
   url: string;
   thumbnailUrl?: string | null;
-  createdAt: string;
+  order: number;
 }
 
 interface Project {
   id: string;
   title: string;
-  slug?: string;
+  slug: string;
   location?: string;
   description: string;
   category: string;
-  status: string;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   displayOrder: number;
   isFeatured: boolean;
   clientName?: string;
@@ -61,6 +61,11 @@ interface Project {
 
 export default function Projects() {
   const navigate = useNavigate();
+  const mediaFileInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
+  const beforeFileInputRef = useRef<HTMLInputElement>(null);
+  const afterFileInputRef = useRef<HTMLInputElement>(null);
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -306,9 +311,11 @@ export default function Projects() {
     try {
       const payload = {
         ...formData,
-        tags: formData.tags
-          .map((tag) => tag.trim())
-          .filter(Boolean),
+        tags: typeof formData.tags === "string"
+          ? formData.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+          : Array.isArray(formData.tags)
+          ? formData.tags
+          : [],
         youtubeUrl: videoSource === "youtube" ? formData.youtubeUrl : "",
         uploadedVideo: videoSource === "upload" ? formData.uploadedVideo : "",
         videoUrl: videoSource === "youtube" ? formData.youtubeUrl : formData.uploadedVideo,
@@ -685,19 +692,20 @@ export default function Projects() {
                         automatically.
                       </p>
                     </div>
-                    <label
-                      htmlFor="project-media-file-input"
+                    <button
+                      type="button"
+                      onClick={() => mediaFileInputRef.current?.click()}
                       className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer"
                     >
                       <Upload size={16} />
                       <span>Add Files</span>
-                    </label>
+                    </button>
                     <input
-                      id="project-media-file-input"
+                      ref={mediaFileInputRef}
                       type="file"
                       multiple
                       accept="image/*,video/*"
-                      className="hidden"
+                      style={{ display: "none" }}
                       onChange={(e) => {
                         if (e.target.files && e.target.files.length > 0) {
                           appendPendingFiles(e.target.files);
@@ -847,18 +855,19 @@ export default function Projects() {
                           className="flex-1 min-w-0 px-3 py-1.5 border rounded-lg bg-white text-xs"
                           placeholder="/uploads/..."
                         />
-                        <label
-                          htmlFor="thumbnail-upload-input"
+                        <button
+                          type="button"
+                          onClick={() => thumbnailFileInputRef.current?.click()}
                           className="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-gray-700 cursor-pointer transition flex-shrink-0"
                         >
                           <Upload size={14} />
                           <span>Upload</span>
-                        </label>
+                        </button>
                         <input
-                          id="thumbnail-upload-input"
+                          ref={thumbnailFileInputRef}
                           type="file"
                           accept="image/*"
-                          className="hidden"
+                          style={{ display: "none" }}
                           onChange={async (e) => {
                             if (e.target.files && e.target.files.length > 0) {
                               const file = e.target.files[0];
@@ -905,18 +914,19 @@ export default function Projects() {
                           className="flex-1 min-w-0 px-3 py-1.5 border rounded-lg bg-white text-xs"
                           placeholder="/uploads/before.jpg"
                         />
-                        <label
-                          htmlFor="before-upload-input"
+                        <button
+                          type="button"
+                          onClick={() => beforeFileInputRef.current?.click()}
                           className="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-gray-700 cursor-pointer transition flex-shrink-0"
                         >
                           <Upload size={14} />
                           <span>Upload</span>
-                        </label>
+                        </button>
                         <input
-                          id="before-upload-input"
+                          ref={beforeFileInputRef}
                           type="file"
                           accept="image/*"
-                          className="hidden"
+                          style={{ display: "none" }}
                           onChange={async (e) => {
                             if (e.target.files && e.target.files.length > 0) {
                               const file = e.target.files[0];
@@ -954,18 +964,19 @@ export default function Projects() {
                           className="flex-1 min-w-0 px-3 py-1.5 border rounded-lg bg-white text-xs"
                           placeholder="/uploads/after.jpg"
                         />
-                        <label
-                          htmlFor="after-upload-input"
+                        <button
+                          type="button"
+                          onClick={() => afterFileInputRef.current?.click()}
                           className="inline-flex items-center gap-1 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-gray-700 cursor-pointer transition flex-shrink-0"
                         >
                           <Upload size={14} />
                           <span>Upload</span>
-                        </label>
+                        </button>
                         <input
-                          id="after-upload-input"
+                          ref={afterFileInputRef}
                           type="file"
                           accept="image/*"
-                          className="hidden"
+                          style={{ display: "none" }}
                           onChange={async (e) => {
                             if (e.target.files && e.target.files.length > 0) {
                               const file = e.target.files[0];

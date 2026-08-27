@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import {
   Upload,
@@ -47,6 +47,9 @@ interface TeamMember {
 }
 
 export default function About() {
+  const ownerFileInputRef = useRef<HTMLInputElement>(null);
+  const teamFileInputRef = useRef<HTMLInputElement>(null);
+
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -167,6 +170,7 @@ export default function About() {
   const handleOwnerFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleOwnerImageUpload(file);
+    e.target.value = "";
   };
 
   const openOwnerMediaSelector = async () => {
@@ -295,6 +299,7 @@ export default function About() {
   const handleTeamFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleTeamImageUpload(file);
+    e.target.value = "";
   };
 
   const openTeamMediaSelector = async () => {
@@ -488,15 +493,20 @@ export default function About() {
                         >
                           <Upload size={14} /> Select from Library
                         </button>
-                        <label className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer">
+                        <button
+                          type="button"
+                          onClick={() => ownerFileInputRef.current?.click()}
+                          className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
+                        >
                           <Upload size={14} /> Add File
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleOwnerFileSelect}
-                            className="hidden"
-                          />
-                        </label>
+                        </button>
+                        <input
+                          ref={ownerFileInputRef}
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={handleOwnerFileSelect}
+                        />
                       </div>
                       {uploadingOwnerImage && (
                         <span className="text-xs text-blue-600">Uploading...</span>
@@ -744,15 +754,20 @@ export default function About() {
                       >
                         <Upload size={14} /> Select from Library
                       </button>
-                      <label className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer">
+                      <button
+                        type="button"
+                        onClick={() => teamFileInputRef.current?.click()}
+                        className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
+                      >
                         <Upload size={14} /> Add File
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleTeamFileSelect}
-                          className="hidden"
-                        />
-                      </label>
+                      </button>
+                      <input
+                        ref={teamFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleTeamFileSelect}
+                      />
                     </div>
                     {uploadingTeamImage && (
                       <span className="text-xs text-blue-600">Uploading...</span>

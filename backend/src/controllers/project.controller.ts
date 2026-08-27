@@ -181,7 +181,7 @@ export const createProject = async (req: Request, res: Response) => {
         completionDate: completionDate ? new Date(completionDate) : null,
         clientName: clientName || null,
         isFeatured: Boolean(isFeatured),
-        tags: Array.isArray(tags) ? tags : [],
+        tags: typeof tags === "string" ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : (Array.isArray(tags) ? tags : []),
         videoUrl: videoUrl || null,
         videoThumbnailUrl: videoThumbnailUrl || null,
         youtubeUrl: youtubeUrl || null,
@@ -248,7 +248,9 @@ export const updateProject = async (req: Request, res: Response) => {
       updateData.completionDate = completionDate ? new Date(completionDate) : null;
     if (clientName !== undefined) updateData.clientName = clientName;
     if (isFeatured !== undefined) updateData.isFeatured = Boolean(isFeatured);
-    if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
+    if (tags !== undefined) {
+      updateData.tags = typeof tags === "string" ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : (Array.isArray(tags) ? tags : []);
+    }
     if (videoUrl !== undefined) updateData.videoUrl = videoUrl;
     if (videoThumbnailUrl !== undefined) updateData.videoThumbnailUrl = videoThumbnailUrl;
     if (youtubeUrl !== undefined) updateData.youtubeUrl = youtubeUrl;
@@ -291,6 +293,18 @@ export const updateProject = async (req: Request, res: Response) => {
 export const deleteProject = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    // Disconnect featuredImage first to prevent circular foreign key constraint errors
+    await prisma.project.update({
+      where: { id },
+      data: { featuredImageId: null },
+    }).catch(() => null);
+
+    // Delete associated media records
+    await prisma.media.deleteMany({
+      where: { projectId: id },
+    }).catch(() => null);
+
     await prisma.project.delete({ where: { id } });
     return res.json({ success: true });
   } catch (error) {

@@ -1,9 +1,11 @@
+import dotenv from 'dotenv';
+// Load environment variables immediately before any other imports
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
-// Reloading server configuration with updated SMTP password...
 import path from 'path';
 
 // Import routes
@@ -18,13 +20,12 @@ import settingsRoutes from './routes/settings.routes';
 import journalRoutes from './routes/journal.routes';
 import aboutRoutes from './routes/about.routes';
 
+// Import email verification
+import { verifyEmailConfig } from './services/email.service';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -105,6 +106,11 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Uploads directory: ${uploadsDir}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Verify SMTP connection in background
+  verifyEmailConfig().catch((err) => {
+    console.error('SMTP verification error:', err);
+  });
 });
 
 export default app;

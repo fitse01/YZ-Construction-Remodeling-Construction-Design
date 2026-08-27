@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import {
   Plus,
@@ -53,6 +53,7 @@ interface Service {
 }
 
 const Services = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -601,19 +602,20 @@ const Services = () => {
                         Upload cover and gallery images directly to the VPS.
                       </p>
                     </div>
-                    <label
-                      htmlFor="service-media-file-input"
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
                       className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer"
                     >
                       <Upload size={16} />
                       <span>Add Files</span>
-                    </label>
+                    </button>
                     <input
-                      id="service-media-file-input"
+                      ref={fileInputRef}
                       type="file"
                       multiple
                       accept="image/*"
-                      className="hidden"
+                      style={{ display: "none" }}
                       onChange={(e) => {
                         if (e.target.files && e.target.files.length > 0) {
                           handleFilesSelected(e.target.files);
