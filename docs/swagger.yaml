@@ -1,0 +1,1150 @@
+basePath: /
+definitions:
+  billing.BankCallbackRequest:
+    properties:
+      bank_id:
+        example: BANK_CBE
+        type: string
+      bank_name:
+        example: Commercial Bank of Ethiopia
+        type: string
+      bank_reference:
+        example: FT26239X8K9L
+        type: string
+      currency:
+        example: ETB
+        type: string
+      event_type:
+        example: PAYMENT_RECEIVED
+        type: string
+      paid_amount:
+        example: 450000
+        type: number
+      paid_at:
+        example: "2026-08-27T17:35:00Z"
+        type: string
+      payer_account_number:
+        example: "1000123456789"
+        type: string
+      payer_name:
+        example: Abebe Kebede
+        type: string
+      payment_status:
+        example: SUCCESS
+        type: string
+      pnr:
+        example: DK8F2X
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+    required:
+    - bank_id
+    - bank_name
+    - bank_reference
+    - currency
+    - paid_amount
+    - payment_status
+    - reference_number
+    type: object
+  billing.BankCallbackResponse:
+    properties:
+      acknowledged_at:
+        example: "2026-08-27T17:35:05Z"
+        type: string
+      message:
+        example: Payment successfully reconciled
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+      status:
+        example: ACKNOWLEDGED
+        type: string
+    type: object
+  billing.BankTransaction:
+    properties:
+      bank_id:
+        type: string
+      bank_name:
+        type: string
+      bank_reference:
+        type: string
+      id:
+        type: string
+      notes:
+        type: string
+      paid_amount_minor:
+        type: integer
+      payer_account_number:
+        type: string
+      payer_name:
+        type: string
+      payment_method:
+        $ref: '#/definitions/billing.PaymentMethod'
+      payment_order_id:
+        type: string
+      raw_payload:
+        type: object
+      receipt_number:
+        type: string
+      received_at:
+        type: string
+      staff_id:
+        type: string
+      transaction_type:
+        $ref: '#/definitions/billing.TransactionType'
+    type: object
+  billing.InitiatePaymentRequest:
+    properties:
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - reservation_id
+    type: object
+  billing.InitiatePaymentResponse:
+    properties:
+      amount:
+        example: 4500
+        type: number
+      amount_minor:
+        example: 450000
+        type: integer
+      check_in_date:
+        example: "2026-09-01"
+        type: string
+      check_out_date:
+        example: "2026-09-04"
+        type: string
+      created_at:
+        example: "2026-08-27T17:30:00Z"
+        type: string
+      currency:
+        example: ETB
+        type: string
+      expires_at:
+        example: "2026-08-27T18:00:00Z"
+        type: string
+      guest_name:
+        example: Abebe Kebede
+        type: string
+      hotel_name:
+        example: Skylight Hotel Addis
+        type: string
+      payment_method:
+        example: DIRECT_BANK
+        type: string
+      payment_order_id:
+        example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+        type: string
+      payment_status:
+        example: INITIATED
+        type: string
+      pnr:
+        example: DK8F2X
+        type: string
+      property_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      stay_nights:
+        example: 3
+        type: integer
+    type: object
+  billing.ManualPaymentRequest:
+    properties:
+      amount_minor:
+        example: 450000
+        type: integer
+      notes:
+        example: Front desk cash counter settlement
+        type: string
+      payment_method:
+        enum:
+        - CASH
+        - POS
+        - CARD
+        - MANUAL
+        example: CASH
+        type: string
+      receipt_number:
+        example: REC-2026-001
+        type: string
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      staff_id:
+        example: 770e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - amount_minor
+    - payment_method
+    - receipt_number
+    - reservation_id
+    type: object
+  billing.ManualPaymentResponse:
+    properties:
+      amount:
+        example: 4500
+        type: number
+      amount_minor:
+        example: 450000
+        type: integer
+      currency:
+        example: ETB
+        type: string
+      payment_method:
+        example: CASH
+        type: string
+      payment_order_id:
+        example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+        type: string
+      payment_status:
+        example: SETTLED
+        type: string
+      pnr:
+        example: DK8F2X
+        type: string
+      property_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      receipt_number:
+        example: REC-2026-001
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      reservation_status:
+        example: CONFIRMED
+        type: string
+      settled_at:
+        example: "2026-08-27T17:40:00Z"
+        type: string
+    type: object
+  billing.PaginatedPaymentsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/billing.PaymentOrderDetailsResponse'
+        type: array
+      limit:
+        example: 20
+        type: integer
+      page:
+        example: 1
+        type: integer
+      total:
+        example: 125
+        type: integer
+      total_pages:
+        example: 7
+        type: integer
+    type: object
+  billing.PaymentMethod:
+    enum:
+    - DIRECT_BANK
+    - CASH
+    - POS
+    - CARD
+    - MANUAL
+    type: string
+    x-enum-varnames:
+    - MethodDirectBank
+    - MethodCash
+    - MethodPOS
+    - MethodCard
+    - MethodManual
+  billing.PaymentOrder:
+    properties:
+      amount_minor:
+        type: integer
+      check_in_date:
+        type: string
+      check_out_date:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      expires_at:
+        type: string
+      guest_name:
+        type: string
+      hotel_name:
+        type: string
+      id:
+        type: string
+      payment_method:
+        $ref: '#/definitions/billing.PaymentMethod'
+      pnr:
+        type: string
+      property_id:
+        type: string
+      receipt_number:
+        type: string
+      reference_number:
+        type: string
+      refund_amount_minor:
+        type: integer
+      refund_reason:
+        type: string
+      refunded_at:
+        type: string
+      reservation_id:
+        type: string
+      settled_at:
+        type: string
+      staff_id:
+        type: string
+      status:
+        $ref: '#/definitions/billing.PaymentOrderStatus'
+      stay_nights:
+        type: integer
+      void_reason:
+        type: string
+      voided_at:
+        type: string
+    type: object
+  billing.PaymentOrderDetailsResponse:
+    properties:
+      amount:
+        example: 4500
+        type: number
+      amount_minor:
+        example: 450000
+        type: integer
+      bank_id:
+        example: BANK_CBE
+        type: string
+      bank_name:
+        example: Commercial Bank of Ethiopia
+        type: string
+      bank_reference:
+        example: FT26239X8K9L
+        type: string
+      check_in_date:
+        example: "2026-09-01"
+        type: string
+      check_out_date:
+        example: "2026-09-04"
+        type: string
+      created_at:
+        example: "2026-08-27T17:30:00Z"
+        type: string
+      currency:
+        example: ETB
+        type: string
+      expires_at:
+        example: "2026-08-27T18:00:00Z"
+        type: string
+      guest_name:
+        example: Abebe Kebede
+        type: string
+      hotel_name:
+        example: Skylight Hotel Addis
+        type: string
+      payer_account_number:
+        example: "1000123456789"
+        type: string
+      payer_name:
+        example: Abebe Kebede
+        type: string
+      payment_method:
+        example: DIRECT_BANK
+        type: string
+      payment_order_id:
+        example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+        type: string
+      payment_status:
+        example: SETTLED
+        type: string
+      pnr:
+        example: DK8F2X
+        type: string
+      property_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      receipt_number:
+        example: REC-2026-001
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+      refund_amount:
+        type: number
+      refund_amount_minor:
+        type: integer
+      refund_reason:
+        type: string
+      refunded_at:
+        type: string
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      settled_at:
+        example: "2026-08-27T17:35:00Z"
+        type: string
+      staff_id:
+        example: 770e8400-e29b-41d4-a716-446655440000
+        type: string
+      stay_nights:
+        example: 3
+        type: integer
+      transactions:
+        items:
+          $ref: '#/definitions/billing.BankTransaction'
+        type: array
+      void_reason:
+        type: string
+      voided_at:
+        type: string
+    type: object
+  billing.PaymentOrderStatus:
+    enum:
+    - INITIATED
+    - SETTLED
+    - VOIDED
+    - REFUNDED
+    - EXPIRED
+    - FAILED
+    type: string
+    x-enum-varnames:
+    - StatusInitiated
+    - StatusSettled
+    - StatusVoided
+    - StatusRefunded
+    - StatusExpired
+    - StatusFailed
+  billing.RefundPaymentRequest:
+    properties:
+      reason:
+        example: Guest cancellation within free cancellation policy
+        type: string
+      refund_amount_minor:
+        example: 450000
+        type: integer
+      staff_id:
+        example: 770e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - reason
+    - refund_amount_minor
+    type: object
+  billing.RefundPaymentResponse:
+    properties:
+      currency:
+        example: ETB
+        type: string
+      payment_order_id:
+        example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+        type: string
+      reason:
+        example: Guest cancellation within free cancellation policy
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+      refund_amount:
+        example: 4500
+        type: number
+      refund_amount_minor:
+        example: 450000
+        type: integer
+      refunded_at:
+        example: "2026-08-27T17:45:00Z"
+        type: string
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      status:
+        example: REFUNDED
+        type: string
+    type: object
+  billing.ReservationFolioResponse:
+    properties:
+      currency:
+        example: ETB
+        type: string
+      guest_name:
+        example: Abebe Kebede
+        type: string
+      hotel_name:
+        example: Skylight Hotel Addis
+        type: string
+      orders:
+        items:
+          $ref: '#/definitions/billing.PaymentOrder'
+        type: array
+      outstanding_balance:
+        example: 0
+        type: number
+      outstanding_balance_minor:
+        example: 0
+        type: integer
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      reservation_status:
+        example: CONFIRMED
+        type: string
+      total_paid:
+        example: 4500
+        type: number
+      total_paid_minor:
+        example: 450000
+        type: integer
+      total_stay_cost:
+        example: 4500
+        type: number
+      total_stay_cost_minor:
+        example: 450000
+        type: integer
+      transactions:
+        items:
+          $ref: '#/definitions/billing.BankTransaction'
+        type: array
+    type: object
+  billing.ReservationPaymentStatusResponse:
+    properties:
+      amount:
+        example: 4500
+        type: number
+      amount_minor:
+        example: 450000
+        type: integer
+      bank_id:
+        example: BANK_CBE
+        type: string
+      bank_name:
+        example: Commercial Bank of Ethiopia
+        type: string
+      bank_reference:
+        example: FT26239X8K9L
+        type: string
+      currency:
+        example: ETB
+        type: string
+      expires_at:
+        example: "2026-08-27T18:00:00Z"
+        type: string
+      payment_order_id:
+        example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+        type: string
+      payment_status:
+        example: SETTLED
+        type: string
+      pnr:
+        example: DK8F2X
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+      reservation_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      reservation_status:
+        example: CONFIRMED
+        type: string
+      settled_at:
+        example: "2026-08-27T17:35:00Z"
+        type: string
+    type: object
+  billing.TransactionType:
+    enum:
+    - CREDIT
+    - REFUND
+    - MANUAL_CASH
+    - MANUAL_POS
+    - VOID
+    type: string
+    x-enum-varnames:
+    - TxTypeCredit
+    - TxTypeRefund
+    - TxTypeManualCash
+    - TxTypeManualPOS
+    - TxTypeVoid
+  billing.VoidPaymentRequest:
+    properties:
+      reason:
+        example: Guest opted for front-desk cash payment
+        type: string
+      staff_id:
+        example: 770e8400-e29b-41d4-a716-446655440000
+        type: string
+    required:
+    - reason
+    type: object
+  billing.VoidPaymentResponse:
+    properties:
+      payment_order_id:
+        example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+        type: string
+      pnr:
+        example: DK8F2X
+        type: string
+      reason:
+        example: Guest opted for front-desk cash payment
+        type: string
+      reference_number:
+        example: DOKI-PAY-2026-X8F29K
+        type: string
+      status:
+        example: VOIDED
+        type: string
+      voided_at:
+        example: "2026-08-27T17:40:00Z"
+        type: string
+    type: object
+  reservation.HoldReservationRequest:
+    properties:
+      check_in_date:
+        description: YYYY-MM-DD
+        type: string
+      check_out_date:
+        description: YYYY-MM-DD
+        type: string
+      currency:
+        type: string
+      guest_email:
+        type: string
+      guest_name:
+        type: string
+      guest_phone:
+        type: string
+      hold_duration_mins:
+        type: integer
+      hotel_id:
+        type: string
+      hotel_name:
+        type: string
+      room_id:
+        type: string
+      room_type:
+        type: string
+      stay_nights:
+        type: integer
+      total_amount_minor:
+        type: integer
+    required:
+    - check_in_date
+    - check_out_date
+    - guest_email
+    - guest_name
+    - hotel_id
+    - hotel_name
+    - room_id
+    - room_type
+    - stay_nights
+    - total_amount_minor
+    type: object
+  reservation.HoldReservationResponse:
+    properties:
+      check_in_date:
+        type: string
+      check_out_date:
+        type: string
+      currency:
+        type: string
+      guest_name:
+        type: string
+      hold_expires_at:
+        type: string
+      hotel_name:
+        type: string
+      reservation_id:
+        type: string
+      status:
+        type: string
+      stay_nights:
+        type: integer
+      total_amount:
+        type: number
+      total_amount_minor:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: fintech@doki.travel
+    name: DOKI Fintech Engineering Team
+  description: Direct Host-to-Host Bank Payment Initiation, Webhook Ingestion, and
+    Atomic Ledger Reconciliation Engine for DOKI.
+  title: DOKI Direct Banking & Billing Engine API
+  version: "1.0"
+paths:
+  /v1/admin/properties/{property_id}/payments:
+    get:
+      description: '[READ] Paginated ledger listing for hotel accountants, filterable
+        by status, bank_id, payment_method, PNR, and date range'
+      parameters:
+      - description: Property UUID
+        in: path
+        name: property_id
+        required: true
+        type: string
+      - description: Payment Status filter (INITIATED, SETTLED, VOIDED, REFUNDED)
+        in: query
+        name: status
+        type: string
+      - description: Bank ID filter (e.g. BANK_CBE, BANK_BOA)
+        in: query
+        name: bank_id
+        type: string
+      - description: Payment Method filter (DIRECT_BANK, CASH, POS)
+        in: query
+        name: payment_method
+        type: string
+      - description: Booking PNR filter
+        in: query
+        name: pnr
+        type: string
+      - description: Reference Number filter
+        in: query
+        name: reference_number
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size limit (default: 20)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Paginated ledger records
+          schema:
+            $ref: '#/definitions/billing.PaginatedPaymentsResponse'
+        "400":
+          description: Invalid property UUID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List and filter property payment ledger
+      tags:
+      - Admin
+  /v1/admin/properties/{property_id}/payments/manual:
+    post:
+      consumes:
+      - application/json
+      description: '[CREATE] Records manual counter cash or terminal POS settlement
+        directly into the guest folio and confirms reservation'
+      parameters:
+      - description: Property UUID
+        in: path
+        name: property_id
+        required: true
+        type: string
+      - description: Manual payment settlement payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/billing.ManualPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Manual payment recorded and reservation confirmed
+          schema:
+            $ref: '#/definitions/billing.ManualPaymentResponse'
+        "400":
+          description: Invalid payload
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Reservation not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Record front-desk cash or POS payment
+      tags:
+      - Admin
+  /v1/payments/{payment_id}:
+    get:
+      description: '[READ] Fetch complete payment order details, PNR, payer account,
+        bank reference, and ledger transaction history'
+      parameters:
+      - description: Payment Order UUID
+        in: path
+        name: payment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment order details
+          schema:
+            $ref: '#/definitions/billing.PaymentOrderDetailsResponse'
+        "400":
+          description: Invalid payment UUID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Payment order not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get payment order profile
+      tags:
+      - Payments
+  /v1/payments/{payment_id}/refund:
+    post:
+      consumes:
+      - application/json
+      description: '[UPDATE] Issues an accounting credit and marks the transaction
+        as REFUNDED, logging staff ID and justification'
+      parameters:
+      - description: Payment Order UUID
+        in: path
+        name: payment_id
+        required: true
+        type: string
+      - description: Refund payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/billing.RefundPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Refund processed and ledgered
+          schema:
+            $ref: '#/definitions/billing.RefundPaymentResponse'
+        "400":
+          description: Invalid payload or invalid refund amount
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Payment order not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Order not settled
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Process full or partial payment refund
+      tags:
+      - Payments
+  /v1/payments/{payment_id}/void:
+    post:
+      consumes:
+      - application/json
+      description: '[UPDATE] Cancels an open, un-settled payment order before expiry
+        or if guest changes payment method'
+      parameters:
+      - description: Payment Order UUID
+        in: path
+        name: payment_id
+        required: true
+        type: string
+      - description: Void payment justification and staff ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/billing.VoidPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment order voided
+          schema:
+            $ref: '#/definitions/billing.VoidPaymentResponse'
+        "400":
+          description: Invalid payload
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Payment order not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Order cannot be voided
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Void unpaid payment order
+      tags:
+      - Payments
+  /v1/payments/initiate:
+    post:
+      consumes:
+      - application/json
+      description: '[CREATE] Generates reference_number, 6-character PNR, stay duration,
+        and bank payment instructions for a held reservation'
+      parameters:
+      - description: Payment initiation payload containing reservation_id
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/billing.InitiatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Payment order created successfully
+          schema:
+            $ref: '#/definitions/billing.InitiatePaymentResponse'
+        "400":
+          description: Invalid request payload or malformed UUID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Missing or invalid authorization token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Reservation not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Reservation not in HELD state or order already settled
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Initiate direct bank payment order
+      tags:
+      - Payments
+  /v1/reservations/{reservation_id}/payments:
+    get:
+      description: '[READ] Returns the complete financial folio displaying total stay
+        cost, paid amounts, outstanding balance, and transaction history'
+      parameters:
+      - description: Reservation UUID
+        in: path
+        name: reservation_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Financial folio
+          schema:
+            $ref: '#/definitions/billing.ReservationFolioResponse'
+        "400":
+          description: Invalid reservation UUID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Reservation not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get guest reservation financial folio
+      tags:
+      - Folios
+  /v1/reservations/{reservation_id}/payments/status:
+    get:
+      description: '[READ] Lightweight polling endpoint for the frontend checkout
+        screen during the 15-minute hold window'
+      parameters:
+      - description: Reservation UUID
+        in: path
+        name: reservation_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment order and reservation status
+          schema:
+            $ref: '#/definitions/billing.ReservationPaymentStatusResponse'
+        "400":
+          description: Invalid reservation UUID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Reservation or payment order not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Poll checkout payment status
+      tags:
+      - Payments
+  /v1/reservations/hold:
+    post:
+      consumes:
+      - application/json
+      description: Creates a room hold reservation with hold TTL prior to payment
+        initiation
+      parameters:
+      - description: Hold reservation payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/reservation.HoldReservationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Room successfully held
+          schema:
+            $ref: '#/definitions/reservation.HoldReservationResponse'
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Missing or invalid authorization token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Hold a room for booking
+      tags:
+      - Reservations
+  /v1/webhooks/bank/credit:
+    post:
+      consumes:
+      - application/json
+      description: '[INGEST] Direct host-to-host inbound webhook invoked by the bank
+        upon guest transfer completion with paid amount, payer account, bank ID, and
+        bank reference'
+      parameters:
+      - description: Inbound bank credit callback payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/billing.BankCallbackRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Callback acknowledged and payment reconciled
+          schema:
+            $ref: '#/definitions/billing.BankCallbackResponse'
+        "400":
+          description: Invalid webhook payload or amount mismatch
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable callback state or currency mismatch
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Inbound bank credit webhook callback
+      tags:
+      - Webhooks
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
