@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { API_BASE } from "@/lib/api";
 
 interface ProjectMedia {
   id: string;
@@ -290,18 +289,7 @@ export default function Projects() {
     } catch (err) {
       console.error("Failed to delete media:", err);
       alert("Failed to delete media");
-        const responseData = await uploadProjectAsset(projectId, file);
-
-        if (responseData) {
-          uploaded.push(responseData);
-        }
-      }
-    } finally {
-      setUploadingMedia(false);
-      setUploadProgress(0);
     }
-
-    return uploaded;
   };
 
   const uploadGeneratedVideoThumbnail = async (projectId: string, videoFile: File) => {
@@ -311,6 +299,14 @@ export default function Projects() {
     const thumbnailMedia = await uploadProjectAsset(projectId, thumbnailFile);
     return thumbnailMedia.url;
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const payload = {
+        ...formData,
+        tags: formData.tags
           .map((tag) => tag.trim())
           .filter(Boolean),
         youtubeUrl: videoSource === "youtube" ? formData.youtubeUrl : "",

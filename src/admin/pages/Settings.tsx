@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/AuthContext";
+import { API_BASE } from "@/lib/api";
 
 const Settings = ({ hideSidebar = false }: { hideSidebar?: boolean }) => {
   const { user, checkAuth } = useAuth();
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [profileImageUrl, setProfileImageUrl] = useState("");
@@ -72,7 +72,6 @@ const Settings = ({ hideSidebar = false }: { hideSidebar?: boolean }) => {
     }
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
       const response = await fetch(`${API_BASE}/api/auth/change-password`, {
         method: "POST",
         credentials: "include",

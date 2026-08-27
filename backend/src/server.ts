@@ -29,6 +29,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust first proxy hop (Nginx reverse proxy)
+// This is critical for express-rate-limit and HTTPS secure cookies
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false, // Disable CSP for file uploads
@@ -39,9 +43,12 @@ app.use(helmet({
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.ADMIN_DASHBOARD_URL,
-  'http://localhost:8080',
+  'https://yzbconstruction.com',
+  'https://www.yzbconstruction.com',
+  'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:5174',
+  'http://localhost:8080',
 ].filter(Boolean) as string[];
 
 app.use(cors({

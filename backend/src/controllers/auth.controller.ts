@@ -14,6 +14,13 @@ const userSelect = {
   role: true,
 } as const;
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+};
+
 export const login = async (req: AuthRequest, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -63,16 +70,12 @@ export const login = async (req: AuthRequest, res: Response) => {
 
     // Set HTTP-only cookies
     res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      ...COOKIE_OPTIONS,
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      ...COOKIE_OPTIONS,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -123,9 +126,7 @@ export const refresh = async (req: AuthRequest, res: Response) => {
     const newAccessToken = generateAccessToken(tokenPayload);
 
     res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      ...COOKIE_OPTIONS,
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
@@ -147,9 +148,9 @@ export const logout = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Clear cookies
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    // Clear cookies with matching options
+    res.clearCookie('accessToken', COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', COOKIE_OPTIONS);
 
     res.json({ success: true });
   } catch (error) {

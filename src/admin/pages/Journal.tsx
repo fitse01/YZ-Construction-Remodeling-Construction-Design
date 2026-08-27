@@ -17,8 +17,7 @@ import {
   X,
 } from "lucide-react";
 import axios from "axios";
-
-const API_BASE = "http://localhost:3001";
+import { API_BASE } from "@/lib/api";
 
 interface JournalMedia {
   id: string;

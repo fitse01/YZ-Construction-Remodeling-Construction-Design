@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Save, Globe, MapPin, Facebook, Instagram, Linkedin } from 'lucide-react'
 import axios from 'axios'
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+import { API_BASE } from '@/lib/api'
 
 interface SiteSettings {
   id: string

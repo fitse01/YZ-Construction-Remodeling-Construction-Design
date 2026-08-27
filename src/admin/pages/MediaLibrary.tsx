@@ -48,7 +48,9 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
       if (activeType !== 'all') params.append('type', activeType)
       if (search) params.append('search', search)
 
-      const res = await fetch(`/api/media?${params.toString()}`)
+      const res = await fetch(`/api/media?${params.toString()}`, {
+        credentials: 'include',
+      })
       if (res.ok) {
         const data = await res.json()
         setMediaList(data.media || [])
@@ -74,6 +76,7 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
       try {
         await fetch(`/api/media/upload/${targetFolder}`, {
           method: 'POST',
+          credentials: 'include',
           body: formData,
         })
       } catch (err) {
@@ -88,7 +91,10 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this media file?')) return
     try {
-      const res = await fetch(`/api/media/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/media/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
       if (res.ok) {
         setMediaList(prev => prev.filter(m => m.id !== id))
       }

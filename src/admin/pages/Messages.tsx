@@ -55,7 +55,9 @@ export default function Messages() {
       params.append("limit", String(pageSize));
       if (search) params.append("search", search);
 
-      const res = await fetch(`/api/messages?${params.toString()}`);
+      const res = await fetch(`/api/messages?${params.toString()}`, {
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages || []);
@@ -73,6 +75,7 @@ export default function Messages() {
     try {
       const res = await fetch(`/api/messages/${id}`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
       });
@@ -90,7 +93,10 @@ export default function Messages() {
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this message?")) return;
     try {
-      const res = await fetch(`/api/messages/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/messages/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (res.ok) {
         setMessages((prev) => prev.filter((m) => m.id !== id));
         if (selectedMsg?.id === id) setSelectedMsg(null);

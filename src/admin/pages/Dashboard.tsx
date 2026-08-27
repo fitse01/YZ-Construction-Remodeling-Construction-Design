@@ -44,11 +44,11 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       const [projectsRes, servicesRes, messagesRes, mediaRes, journalsRes] = await Promise.all([
-        fetch('/api/projects?limit=100').then(r => r.json()),
-        fetch('/api/services?limit=100').then(r => r.json()),
-        fetch('/api/messages?limit=10').then(r => r.json()),
-        fetch('/api/media?limit=6').then(r => r.json()),
-        fetch('/api/journals?limit=100').then(r => r.json()),
+        fetch('/api/projects?limit=100', { credentials: 'include' }).then(r => r.json()).catch(() => ({ projects: [] })),
+        fetch('/api/services?limit=100', { credentials: 'include' }).then(r => r.json()).catch(() => ({ services: [] })),
+        fetch('/api/messages?limit=10', { credentials: 'include' }).then(r => r.json()).catch(() => ({ messages: [], unreadCount: 0 })),
+        fetch('/api/media?limit=6', { credentials: 'include' }).then(r => r.json()).catch(() => ({ media: [] })),
+        fetch('/api/journals?limit=100', { credentials: 'include' }).then(r => r.json()).catch(() => ({ journals: [] })),
       ])
 
       const projects = projectsRes.projects || []
