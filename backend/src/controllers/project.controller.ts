@@ -90,11 +90,23 @@ export const getProjects = async (req: Request, res: Response) => {
       prisma.project.count({ where }),
     ]);
 
-    const formatted = projects.map((p) => ({
-      ...p,
-      images: p.media.filter((m) => m.type === "image"),
-      videos: p.media.filter((m) => m.type === "video"),
-    }));
+    const formatted = projects.map((p) => {
+      const firstVideo = p.media.find((m) => m.type === "video");
+      const firstImage = p.media.find((m) => m.type === "image");
+      const uploadedVideo = p.uploadedVideo || (firstVideo ? firstVideo.url : null);
+      const videoUrl = p.videoUrl || p.youtubeUrl || uploadedVideo;
+      const videoThumbnailUrl = p.videoThumbnailUrl || (firstVideo ? firstVideo.thumbnailUrl : null);
+
+      return {
+        ...p,
+        uploadedVideo,
+        videoUrl,
+        videoThumbnailUrl,
+        featuredImage: p.featuredImage || (firstImage ? { url: firstImage.url } : null),
+        images: p.media.filter((m) => m.type === "image"),
+        videos: p.media.filter((m) => m.type === "video"),
+      };
+    });
 
     return res.json({
       projects: formatted,
@@ -129,8 +141,18 @@ export const getProjectById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Project not found" });
     }
 
+    const firstVideo = project.media.find((m) => m.type === "video");
+    const firstImage = project.media.find((m) => m.type === "image");
+    const uploadedVideo = project.uploadedVideo || (firstVideo ? firstVideo.url : null);
+    const videoUrl = project.videoUrl || project.youtubeUrl || uploadedVideo;
+    const videoThumbnailUrl = project.videoThumbnailUrl || (firstVideo ? firstVideo.thumbnailUrl : null);
+
     return res.json({
       ...project,
+      uploadedVideo,
+      videoUrl,
+      videoThumbnailUrl,
+      featuredImage: project.featuredImage || (firstImage ? { url: firstImage.url } : null),
       images: project.media.filter((m) => m.type === "image"),
       videos: project.media.filter((m) => m.type === "video"),
     });

@@ -88,7 +88,12 @@ function Testimonials() {
         const data = await response.json();
         if (data && data.projects) {
           const videoOnly = data.projects.filter(
-            (p: any) => p.youtubeUrl || p.uploadedVideo || p.videoUrl,
+            (p: any) =>
+              p.youtubeUrl ||
+              p.uploadedVideo ||
+              p.videoUrl ||
+              (p.videos && p.videos.length > 0) ||
+              (p.media && p.media.some((m: any) => m.type === "video")),
           );
           setVideoProjects(videoOnly);
         }
@@ -294,7 +299,7 @@ function Testimonials() {
               </h2>
             </div>
             <Link
-              to="/testimony/journal"
+              to="/testimonials/journal"
               className="text-primary hover:text-primary-hover flex items-center gap-1.5 font-semibold text-sm"
             >
               View All Articles <ArrowRight className="w-4 h-4" />
@@ -309,8 +314,8 @@ function Testimonials() {
                 >
                   <div className="aspect-4/3 sm:aspect-auto overflow-hidden">
                     <Link
-                      to="/testimony/journal/$id"
-                      params={{ id: p.id }}
+                      to="/testimonials/journal/$slug"
+                      params={{ slug: p.slug }}
                       className="w-full h-full block"
                     >
                       {p.featuredImage ? (
@@ -333,8 +338,8 @@ function Testimonials() {
                         {p.category}
                       </div>
                       <Link
-                        to="/testimony/journal/$id"
-                        params={{ id: p.id }}
+                        to="/testimonials/journal/$slug"
+                        params={{ slug: p.slug }}
                         className="block hover:text-primary transition-colors"
                       >
                         <h3 className="mt-3 text-xl font-display font-semibold leading-snug line-clamp-2">
@@ -350,8 +355,8 @@ function Testimonials() {
                         {p.readingTime || "5 min read"}
                       </span>
                       <Link
-                        to="/testimony/journal/$id"
-                        params={{ id: p.id }}
+                        to="/testimonials/journal/$slug"
+                        params={{ slug: p.slug }}
                         className="text-primary font-semibold hover:text-primary-hover flex items-center gap-1 text-xs"
                       >
                         Read More{" "}

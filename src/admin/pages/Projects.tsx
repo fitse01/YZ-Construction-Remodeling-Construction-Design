@@ -366,15 +366,18 @@ export default function Projects() {
         if (firstImage) nextUpdate.featuredImageId = firstImage.id;
       }
 
-      if (videoSource === "upload") {
-        const firstVideo = uploadedMedia.find((item) => item.type === "video");
-        if (firstVideo) {
-          nextUpdate.uploadedVideo = firstVideo.url;
-          nextUpdate.videoUrl = firstVideo.url;
+      const anyVideo =
+        uploadedMedia.find((item) => item.type === "video") ||
+        editingProject?.media?.find((item) => item.type === "video");
+
+      if (anyVideo && (!payload.uploadedVideo || videoSource === "upload")) {
+        nextUpdate.uploadedVideo = anyVideo.url;
+        if (!payload.youtubeUrl) {
+          nextUpdate.videoUrl = anyVideo.url;
         }
       }
 
-      if (!payload.videoThumbnailUrl && videoSource === "upload") {
+      if (!payload.videoThumbnailUrl) {
         const sourceVideoFile = pendingFiles.find((file) => file.type.startsWith("video/"));
         if (sourceVideoFile) {
           const generatedThumbnailUrl = await uploadGeneratedVideoThumbnail(projectId, sourceVideoFile);

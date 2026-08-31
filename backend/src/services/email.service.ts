@@ -17,7 +17,7 @@ export interface ReplyEmailParams {
 }
 
 export const getTransporter = () => {
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
   const port = parseInt(process.env.SMTP_PORT || '587', 10);
   const user = (process.env.SMTP_USER || '').trim();
   // App Passwords often have spaces when copied from Google (e.g. "abcd efgh ijkl mnop"), strip them
@@ -26,6 +26,17 @@ export const getTransporter = () => {
 
   if (!user || !pass) {
     return null;
+  }
+
+  // Dedicated Gmail service provider in nodemailer handles connection pooling & TLS reliably
+  if (host.toLowerCase().includes('gmail') || user.toLowerCase().endsWith('@gmail.com')) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
   }
 
   const isSecure = port === 465;
@@ -56,6 +67,36 @@ export const verifyEmailConfig = async (): Promise<boolean> => {
     console.error('❌ SMTP verification failed:', error.message || error);
     return false;
   }
+};
+
+export const sendTestEmail = async (targetEmail?: string) => {
+  const transporter = getTransporter();
+  if (!transporter) {
+    throw new Error('SMTP credentials not configured (SMTP_USER or SMTP_PASSWORD missing in backend/.env)');
+  }
+  const to = (targetEmail || process.env.OWNER_EMAIL || process.env.SMTP_USER || '').trim();
+  const fromAddress = (process.env.SMTP_FROM || process.env.SMTP_USER || '').trim();
+
+  if (!to) {
+    throw new Error('No recipient email specified and OWNER_EMAIL is not set in backend/.env');
+  }
+
+  const info = await transporter.sendMail({
+    from: `"YZ Construction" <${fromAddress}>`,
+    to,
+    subject: '🧪 YZ Construction SMTP Test Email',
+    text: 'If you are reading this, your SMTP configuration is working properly!',
+    html: `
+      <div style="font-family:sans-serif;padding:20px;background:#f8fafc;border-radius:8px;">
+        <h2 style="color:#0f172a;">✅ SMTP Test Successful</h2>
+        <p style="color:#334155;">Your YZ Construction email notification system is configured and working properly.</p>
+        <p style="color:#64748b;font-size:12px;">Sent to: <strong>${to}</strong></p>
+      </div>
+    `,
+  });
+
+  console.log(`✅ Test email delivered to ${to} (MessageId: ${info.messageId})`);
+  return { success: true, messageId: info.messageId, recipient: to };
 };
 
 export const sendNotificationToOwner = async (data: SendMessageEmailParams): Promise<boolean> => {

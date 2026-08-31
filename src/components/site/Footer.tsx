@@ -77,7 +77,7 @@ export function Footer() {
               ["About", "/about"],
               ["Services", "/services"],
               ["Projects", "/projects"],
-              ["Journal", "/testimony/journal"],
+              ["Journal", "/testimonials/journal"],
               ["Testimonials", "/testimonials"],
               ["Contact", "/contact"],
             ].map(([l, to]) => (

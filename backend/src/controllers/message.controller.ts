@@ -23,14 +23,18 @@ export const createMessage = async (req: Request, res: Response) => {
       },
     });
 
-    // Send emails asynchronously
-    sendNotificationToOwner({ name, email, phone, projectType, budget, timeline, message }).catch(err =>
-      console.error('Owner email error:', err)
-    );
+    // Send emails asynchronously with detailed error logging
+    sendNotificationToOwner({ name, email, phone, projectType, budget, timeline, message })
+      .then((sent) => {
+        if (!sent) console.warn('⚠️ Owner email notification was not sent (check SMTP settings).');
+      })
+      .catch((err) => console.error('❌ Owner email error:', err));
 
-    sendConfirmationToClient({ name, email, phone, projectType, budget, timeline, message }).catch(err =>
-      console.error('Client email error:', err)
-    );
+    sendConfirmationToClient({ name, email, phone, projectType, budget, timeline, message })
+      .then((sent) => {
+        if (!sent) console.warn('⚠️ Client confirmation email was not sent.');
+      })
+      .catch((err) => console.error('❌ Client email error:', err));
 
     return res.status(201).json({ success: true, message: savedMessage });
   } catch (error) {

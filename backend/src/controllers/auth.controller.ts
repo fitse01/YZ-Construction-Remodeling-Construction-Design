@@ -53,12 +53,12 @@ export const login = async (req: AuthRequest, res: Response) => {
     const accessToken = generateAccessToken(tokenPayload);
     const refreshToken = generateRefreshToken(tokenPayload);
 
-    // Save refresh token to database
+    // Save refresh token to database (30 days)
     await prisma.refreshToken.create({
       data: {
         token: refreshToken,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       },
     });
 
@@ -68,15 +68,15 @@ export const login = async (req: AuthRequest, res: Response) => {
       data: { lastLoginAt: new Date() },
     });
 
-    // Set HTTP-only cookies
+    // Set HTTP-only cookies (24 hours access token, 30 days refresh token)
     res.cookie('accessToken', accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
     res.cookie('refreshToken', refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
     res.json({
@@ -127,7 +127,7 @@ export const refresh = async (req: AuthRequest, res: Response) => {
 
     res.cookie('accessToken', newAccessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
     res.json({ success: true });

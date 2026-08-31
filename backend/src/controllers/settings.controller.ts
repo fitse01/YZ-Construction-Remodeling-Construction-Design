@@ -242,3 +242,18 @@ export const updateHomePage = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Failed to update home page content' });
   }
 };
+
+export const testEmailSettings = async (req: AuthRequest, res: Response) => {
+  try {
+    const { email } = req.body;
+    const { sendTestEmail } = await import('../services/email.service');
+    const result = await sendTestEmail(email);
+    res.json({ success: true, message: 'Test email sent successfully', result });
+  } catch (error: any) {
+    console.error('Test email error:', error);
+    res.status(400).json({
+      error: error.message || 'Failed to send test email',
+      hint: 'Please check SMTP_USER and SMTP_PASSWORD in backend/.env',
+    });
+  }
+};

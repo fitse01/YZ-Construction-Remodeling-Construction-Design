@@ -18,6 +18,8 @@ interface ApiProject {
   beforeImageUrl?: string | null;
   afterImageUrl?: string | null;
   images?: Array<{ url: string; thumbnailUrl?: string | null }>;
+  videos?: Array<{ url: string; thumbnailUrl?: string | null }>;
+  media?: Array<{ url: string; thumbnailUrl?: string | null; type: string }>;
   featuredImage?: { url: string } | null;
   createdAt: string;
 }
@@ -126,15 +128,18 @@ function Projects() {
 
   const cards = useMemo<ProjectCard[]>(() => {
     return projects.map((project) => {
-      const ytThumbnail = project.youtubeUrl
-        ? getYouTubeThumbnail(project.youtubeUrl)
-        : project.videoUrl
-          ? getYouTubeThumbnail(project.videoUrl)
-          : null;
+      const firstVideo = project.videos?.[0] || project.media?.find((m) => m.type === "video");
+      const uploadedVideo = project.uploadedVideo || (firstVideo ? firstVideo.url : null);
+      const isYt = project.youtubeUrl || (project.videoUrl && (project.videoUrl.includes("youtube.com") || project.videoUrl.includes("youtu.be")));
+      const youtubeUrl = isYt ? (project.youtubeUrl || project.videoUrl) : null;
+      const videoUrl = youtubeUrl || uploadedVideo || project.videoUrl || null;
+      const ytThumbnail = youtubeUrl ? getYouTubeThumbnail(youtubeUrl) : null;
+      const videoThumbnailUrl = project.videoThumbnailUrl || (firstVideo ? firstVideo.thumbnailUrl : null) || ytThumbnail;
+
       const image =
         project.featuredImage?.url ||
         project.images?.[0]?.url ||
-        project.videoThumbnailUrl ||
+        videoThumbnailUrl ||
         ytThumbnail ||
         "/placeholder-project.jpg";
 
@@ -148,10 +153,10 @@ function Projects() {
           : new Date(project.createdAt).getFullYear().toString(),
         image,
         description: project.description,
-        videoUrl: project.videoUrl,
-        videoThumbnailUrl: project.videoThumbnailUrl,
-        youtubeUrl: project.youtubeUrl,
-        uploadedVideo: project.uploadedVideo,
+        videoUrl,
+        videoThumbnailUrl,
+        youtubeUrl,
+        uploadedVideo,
         beforeImageUrl: project.beforeImageUrl,
         afterImageUrl: project.afterImageUrl,
       };
@@ -159,14 +164,12 @@ function Projects() {
   }, [projects]);
 
   const imageProjects = useMemo(() => {
-    return cards.filter(
-      (project) => !project.youtubeUrl && !project.uploadedVideo && !project.videoUrl,
-    );
+    return cards;
   }, [cards]);
 
   const videoProjects = useMemo(() => {
     return cards.filter(
-      (project) => project.youtubeUrl || project.uploadedVideo || project.videoUrl,
+      (project) => Boolean(project.youtubeUrl || project.uploadedVideo || project.videoUrl),
     );
   }, [cards]);
 

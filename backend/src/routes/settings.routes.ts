@@ -11,5 +11,6 @@ router.get('/homepage', settingsController.getHomePage);
 // Protected routes (admin only)
 router.put('/site', authenticate, authorize(['OWNER', 'ADMIN']), settingsController.updateSiteSettings);
 router.put('/homepage', authenticate, authorize(['OWNER', 'ADMIN']), settingsController.updateHomePage);
+router.post('/test-email', authenticate, authorize(['OWNER', 'ADMIN']), settingsController.testEmailSettings);
 
 export default router;
