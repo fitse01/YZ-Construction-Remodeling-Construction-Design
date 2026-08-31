@@ -5,25 +5,50 @@ import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
-// 2GB default limit to accommodate large HD / 4K video uploads
-const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '2147483648', 10); // 2GB (2 * 1024 * 1024 * 1024)
 
-// Allowed file types
-const ALLOWED_IMAGE_TYPES = (
-  process.env.ALLOWED_IMAGE_TYPES ||
-  'image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/avif'
-).split(',');
+// 2GB in bytes: 2 * 1024 * 1024 * 1024 = 2,147,483,648
+const DEFAULT_2GB = 2147483648;
+const parsedEnvSize = process.env.MAX_FILE_SIZE ? parseInt(process.env.MAX_FILE_SIZE, 10) : 0;
+// Always ensure at least 2GB limit, even if an old .env has a smaller value (e.g. 10MB or 50MB)
+export const MAX_FILE_SIZE = parsedEnvSize > DEFAULT_2GB ? parsedEnvSize : DEFAULT_2GB;
 
-const ALLOWED_VIDEO_TYPES = (
-  process.env.ALLOWED_VIDEO_TYPES ||
-  'video/mp4,video/webm,video/quicktime,video/x-matroska,video/ogg,video/avi'
-).split(',');
+// Comprehensive allowed mime types
+const DEFAULT_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+  'image/avif',
+  'image/heic',
+  'image/heif',
+];
 
-const ALLOWED_DOC_TYPES = [
+const DEFAULT_VIDEO_TYPES = [
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-matroska',
+  'video/ogg',
+  'video/avi',
+  'video/mov',
+  'video/x-msvideo',
+  'video/3gpp',
+  'video/mp4v-es',
+];
+
+const DEFAULT_DOC_TYPES = [
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
+
+const envImageTypes = process.env.ALLOWED_IMAGE_TYPES ? process.env.ALLOWED_IMAGE_TYPES.split(',') : [];
+const envVideoTypes = process.env.ALLOWED_VIDEO_TYPES ? process.env.ALLOWED_VIDEO_TYPES.split(',') : [];
+
+const ALLOWED_IMAGE_TYPES = Array.from(new Set([...DEFAULT_IMAGE_TYPES, ...envImageTypes]));
+const ALLOWED_VIDEO_TYPES = Array.from(new Set([...DEFAULT_VIDEO_TYPES, ...envVideoTypes]));
+const ALLOWED_DOC_TYPES = DEFAULT_DOC_TYPES;
 
 // Ensure folder directory exists
 export const ensureFolderDir = (folder: string) => {
@@ -62,7 +87,7 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allAllowed = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES, ...ALLOWED_DOC_TYPES];
-  if (allAllowed.includes(file.mimetype)) {
+  if (allAllowed.includes(file.mimetype) || file.mimetype.startsWith('video/') || file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {
     cb(new Error(`File type ${file.mimetype} is not supported.`));
@@ -78,7 +103,7 @@ export const uploadGeneric = multer({
 export const uploadImages = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) cb(null, true);
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype) || file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Invalid image file type.'));
   },
   limits: { fileSize: MAX_FILE_SIZE },
@@ -87,7 +112,7 @@ export const uploadImages = multer({
 export const uploadVideos = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    if (ALLOWED_VIDEO_TYPES.includes(file.mimetype)) cb(null, true);
+    if (ALLOWED_VIDEO_TYPES.includes(file.mimetype) || file.mimetype.startsWith('video/')) cb(null, true);
     else cb(new Error('Invalid video file type.'));
   },
   limits: { fileSize: MAX_FILE_SIZE },
