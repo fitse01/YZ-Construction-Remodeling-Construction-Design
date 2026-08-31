@@ -10,7 +10,13 @@ const handleUploadMiddleware = (multerMiddleware: any) => {
     multerMiddleware(req, res, (err: any) => {
       if (err) {
         console.error('Multer upload error:', err);
-        return res.status(400).json({ error: err.message });
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(413).json({
+            error: 'File is too large. Maximum allowed file size is 2GB.',
+            code: 'LIMIT_FILE_SIZE',
+          });
+        }
+        return res.status(400).json({ error: err.message || 'File upload failed' });
       }
       next();
     });

@@ -5,12 +5,25 @@ import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
-const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '52428800', 10); // 50MB default
+// 2GB default limit to accommodate large HD / 4K video uploads
+const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '2147483648', 10); // 2GB (2 * 1024 * 1024 * 1024)
 
 // Allowed file types
-const ALLOWED_IMAGE_TYPES = (process.env.ALLOWED_IMAGE_TYPES || 'image/jpeg,image/png,image/webp,image/gif,image/svg+xml').split(',');
-const ALLOWED_VIDEO_TYPES = (process.env.ALLOWED_VIDEO_TYPES || 'video/mp4,video/webm,video/quicktime').split(',');
-const ALLOWED_DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const ALLOWED_IMAGE_TYPES = (
+  process.env.ALLOWED_IMAGE_TYPES ||
+  'image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/avif'
+).split(',');
+
+const ALLOWED_VIDEO_TYPES = (
+  process.env.ALLOWED_VIDEO_TYPES ||
+  'video/mp4,video/webm,video/quicktime,video/x-matroska,video/ogg,video/avi'
+).split(',');
+
+const ALLOWED_DOC_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
 
 // Ensure folder directory exists
 export const ensureFolderDir = (folder: string) => {
@@ -30,10 +43,10 @@ const generateFilename = (originalName: string) => {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let targetFolder = req.params.folder || req.query.folder as string || 'general';
+    let targetFolder = req.params.folder || (req.query.folder as string) || 'general';
     if (!targetFolder || targetFolder === 'general') {
-      if (req.params.projectId) targetFolder = 'projects';
-      else if (req.params.serviceId) targetFolder = 'services';
+      if (req.params.projectId || req.body.projectId) targetFolder = 'projects';
+      else if (req.params.serviceId || req.body.serviceId) targetFolder = 'services';
       else if (file.mimetype.startsWith('video/')) targetFolder = 'videos';
       else if (file.mimetype.startsWith('image/')) targetFolder = 'gallery';
       else targetFolder = 'documents';

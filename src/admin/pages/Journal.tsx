@@ -84,6 +84,7 @@ export default function Journal() {
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<JournalMedia | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -131,7 +132,10 @@ export default function Journal() {
   const handleImageUpload = async (file: File) => {
     if (!file) return;
 
+    const localPreview = URL.createObjectURL(file);
+    setImagePreview(localPreview);
     setUploading(true);
+
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -147,10 +151,15 @@ export default function Journal() {
         url: uploadedMedia.url,
         thumbnailUrl: uploadedMedia.thumbnailUrl || uploadedMedia.url,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to upload image:', error);
-      alert('Failed to upload image');
+      const msg = error.response?.status === 413
+        ? "Image is too large (413). Max allowed size is 2GB."
+        : (error.response?.data?.error || error.message || 'Failed to upload image');
+      alert(msg);
     } finally {
+      URL.revokeObjectURL(localPreview);
+      setImagePreview(null);
       setUploading(false);
     }
   };
@@ -517,28 +526,41 @@ export default function Journal() {
                   Featured Cover Image
                 </label>
                 <div className="flex items-center gap-4 flex-wrap">
-                  {selectedImage ? (
-                    <div className="relative w-40 aspect-video rounded-lg overflow-hidden border">
-                      <img src={selectedImage.url} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFormData({ ...formData, featuredImageId: "" });
-                          setSelectedImage(null);
-                        }}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow"
-                      >
-                        <X size={12} />
-                      </button>
+                  {imagePreview || selectedImage ? (
+                    <div className="relative w-40 aspect-video rounded-lg overflow-hidden border bg-gray-100">
+                      <img
+                        src={imagePreview || selectedImage?.url}
+                        alt="Cover preview"
+                        className={`w-full h-full object-cover transition-opacity ${
+                          uploading ? "opacity-50" : "opacity-100"
+                        }`}
+                      />
+                      {uploading ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-xs font-medium">
+                          Uploading...
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, featuredImageId: "" });
+                            setSelectedImage(null);
+                          }}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700 transition"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div
                       className="w-40 aspect-video rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 text-xs cursor-pointer hover:border-blue-500 hover:text-blue-500 transition"
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
                     >
                       <ImageIcon size={20} />
-                      <span className="mt-1">Drop image here</span>
+                      <span className="mt-1">Drop image or click</span>
                     </div>
                   )}
                   <div className="flex gap-2">
@@ -552,7 +574,8 @@ export default function Journal() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
+                      disabled={uploading}
+                      className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
                     >
                       <Upload size={14} /> Upload File
                     </button>
@@ -565,7 +588,7 @@ export default function Journal() {
                     />
                   </div>
                   {uploading && (
-                    <span className="text-xs text-blue-600">Uploading...</span>
+                    <span className="text-xs text-blue-600 font-medium">Uploading image...</span>
                   )}
                 </div>
               </div>

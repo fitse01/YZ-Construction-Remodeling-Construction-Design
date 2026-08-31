@@ -112,7 +112,12 @@ export default function Projects() {
   }, [pendingFiles]);
 
   const appendPendingFiles = (files: FileList | File[]) => {
-    setPendingFiles((prev) => [...prev, ...Array.from(files)]);
+    const newFiles = Array.from(files);
+    if (newFiles.length === 0) return;
+    if (newFiles.some((f) => f.type.startsWith("video/"))) {
+      setVideoSource("upload");
+    }
+    setPendingFiles((prev) => [...prev, ...newFiles]);
   };
 
   const uploadProjectAsset = async (projectId: string, file: File) => {
@@ -276,6 +281,12 @@ export default function Projects() {
           uploaded.push(response.data);
         }
       }
+    } catch (err: any) {
+      console.error("Failed to upload project media:", err);
+      const msg = err.response?.status === 413
+        ? "Upload failed (413 Payload Too Large): File size exceeds server limit (2GB)."
+        : (err.response?.data?.error || err.message);
+      throw new Error(msg);
     } finally {
       setUploadingMedia(false);
       setUploadProgress(0);
@@ -708,7 +719,8 @@ export default function Projects() {
                       style={{ display: "none" }}
                       onChange={(e) => {
                         if (e.target.files && e.target.files.length > 0) {
-                          appendPendingFiles(e.target.files);
+                          const filesArray = Array.from(e.target.files);
+                          appendPendingFiles(filesArray);
                         }
                         e.target.value = "";
                       }}
@@ -725,7 +737,8 @@ export default function Projects() {
                       e.preventDefault();
                       setDragActive(false);
                       if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                        appendPendingFiles(e.dataTransfer.files);
+                        const filesArray = Array.from(e.dataTransfer.files);
+                        appendPendingFiles(filesArray);
                       }
                     }}
                     className={`rounded-xl border-2 border-dashed p-6 text-center transition ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-white"}`}

@@ -59,6 +59,7 @@ export default function About() {
   const [showOwnerMediaLibrary, setShowOwnerMediaLibrary] = useState(false);
   const [ownerMediaList, setOwnerMediaList] = useState<MediaItem[]>([]);
   const [uploadingOwnerImage, setUploadingOwnerImage] = useState(false);
+  const [ownerImagePreview, setOwnerImagePreview] = useState<string | null>(null);
 
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMember | null>(null);
@@ -74,6 +75,7 @@ export default function About() {
   const [showTeamMediaLibrary, setShowTeamMediaLibrary] = useState(false);
   const [teamMediaList, setTeamMediaList] = useState<MediaItem[]>([]);
   const [uploadingTeamImage, setUploadingTeamImage] = useState(false);
+  const [teamImagePreview, setTeamImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAboutContent();
@@ -133,7 +135,10 @@ export default function About() {
 
   const handleOwnerImageUpload = async (file: File) => {
     if (!file) return;
+    const localPreview = URL.createObjectURL(file);
+    setOwnerImagePreview(localPreview);
     setUploadingOwnerImage(true);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -151,10 +156,15 @@ export default function About() {
             }
           : prev,
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to upload image:", error);
-      alert("Failed to upload image");
+      const msg = error.response?.status === 413
+        ? "Image is too large (413). Max allowed size is 2GB."
+        : (error.response?.data?.error || error.message || "Failed to upload image");
+      alert(msg);
     } finally {
+      URL.revokeObjectURL(localPreview);
+      setOwnerImagePreview(null);
       setUploadingOwnerImage(false);
     }
   };
@@ -169,7 +179,9 @@ export default function About() {
 
   const handleOwnerFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) handleOwnerImageUpload(file);
+    if (file) {
+      handleOwnerImageUpload(file);
+    }
     e.target.value = "";
   };
 
@@ -269,7 +281,10 @@ export default function About() {
 
   const handleTeamImageUpload = async (file: File) => {
     if (!file) return;
+    const localPreview = URL.createObjectURL(file);
+    setTeamImagePreview(localPreview);
     setUploadingTeamImage(true);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -280,10 +295,15 @@ export default function About() {
       const uploadedMedia = response.data;
       setTeamFormData((prev) => ({ ...prev, imageId: uploadedMedia.id }));
       setSelectedTeamImage(uploadedMedia);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to upload image:", error);
-      alert("Failed to upload image");
+      const msg = error.response?.status === 413
+        ? "Image is too large (413). Max allowed size is 2GB."
+        : (error.response?.data?.error || error.message || "Failed to upload image");
+      alert(msg);
     } finally {
+      URL.revokeObjectURL(localPreview);
+      setTeamImagePreview(null);
       setUploadingTeamImage(false);
     }
   };
@@ -298,7 +318,9 @@ export default function About() {
 
   const handleTeamFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) handleTeamImageUpload(file);
+    if (file) {
+      handleTeamImageUpload(file);
+    }
     e.target.value = "";
   };
 
@@ -455,48 +477,59 @@ export default function About() {
                       Owner Image
                     </label>
                     <div className="flex items-center gap-4 flex-wrap">
-                      {aboutContent.ownerImage ? (
-                        <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
+                      {ownerImagePreview || aboutContent.ownerImage ? (
+                        <div className="relative w-32 h-32 rounded-lg overflow-hidden border bg-gray-100">
                           <img
-                            src={aboutContent.ownerImage.url}
-                            className="w-full h-full object-cover"
+                            src={ownerImagePreview || aboutContent.ownerImage?.url}
+                            alt="Owner"
+                            className={`w-full h-full object-cover transition-opacity ${
+                              uploadingOwnerImage ? "opacity-50" : "opacity-100"
+                            }`}
                           />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setAboutContent({
-                                ...aboutContent,
-                                ownerImageId: null,
-                                ownerImage: null,
-                              })
-                            }
-                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow"
-                          >
-                            <X size={12} />
-                          </button>
+                          {uploadingOwnerImage ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-xs font-medium">
+                              Uploading...
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setAboutContent({
+                                  ...aboutContent,
+                                  ownerImageId: null,
+                                  ownerImage: null,
+                                })
+                              }
+                              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700 transition"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <div
                           className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 text-xs cursor-pointer hover:border-blue-500 hover:text-blue-500 transition"
                           onDragOver={(e) => e.preventDefault()}
                           onDrop={handleOwnerDrop}
+                          onClick={() => ownerFileInputRef.current?.click()}
                         >
                           <ImageIcon size={20} />
-                          <span className="mt-1">Drop image</span>
+                          <span className="mt-1">Drop or click</span>
                         </div>
                       )}
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={openOwnerMediaSelector}
-                          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition"
+                          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
                         >
                           <Upload size={14} /> Select from Library
                         </button>
                         <button
                           type="button"
                           onClick={() => ownerFileInputRef.current?.click()}
-                          className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
+                          disabled={uploadingOwnerImage}
+                          className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
                         >
                           <Upload size={14} /> Add File
                         </button>
@@ -509,7 +542,7 @@ export default function About() {
                         />
                       </div>
                       {uploadingOwnerImage && (
-                        <span className="text-xs text-blue-600">Uploading...</span>
+                        <span className="text-xs text-blue-600 font-medium">Uploading image...</span>
                       )}
                     </div>
                   </div>
@@ -722,42 +755,56 @@ export default function About() {
                     Team Member Image
                   </label>
                   <div className="flex items-center gap-4 flex-wrap">
-                    {selectedTeamImage ? (
-                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
-                        <img src={selectedTeamImage.url} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTeamFormData({ ...teamFormData, imageId: "" });
-                            setSelectedTeamImage(null);
-                          }}
-                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow"
-                        >
-                          <X size={12} />
-                        </button>
+                    {teamImagePreview || selectedTeamImage ? (
+                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border bg-gray-100">
+                        <img
+                          src={teamImagePreview || selectedTeamImage?.url}
+                          alt="Team Member"
+                          className={`w-full h-full object-cover transition-opacity ${
+                            uploadingTeamImage ? "opacity-50" : "opacity-100"
+                          }`}
+                        />
+                        {uploadingTeamImage ? (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white text-xs font-medium">
+                            Uploading...
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTeamFormData({ ...teamFormData, imageId: "" });
+                              setSelectedTeamImage(null);
+                            }}
+                            className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700 transition"
+                          >
+                            <X size={12} />
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <div
                         className="w-32 h-32 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 text-xs cursor-pointer hover:border-blue-500 hover:text-blue-500 transition"
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleTeamDrop}
+                        onClick={() => teamFileInputRef.current?.click()}
                       >
                         <ImageIcon size={20} />
-                        <span className="mt-1">Drop image</span>
+                        <span className="mt-1">Drop or click</span>
                       </div>
                     )}
                     <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={openTeamMediaSelector}
-                        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition"
+                        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
                       >
                         <Upload size={14} /> Select from Library
                       </button>
                       <button
                         type="button"
                         onClick={() => teamFileInputRef.current?.click()}
-                        className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
+                        disabled={uploadingTeamImage}
+                        className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white px-3.5 py-2 rounded-lg font-medium text-xs shadow transition cursor-pointer"
                       >
                         <Upload size={14} /> Add File
                       </button>
@@ -770,7 +817,7 @@ export default function About() {
                       />
                     </div>
                     {uploadingTeamImage && (
-                      <span className="text-xs text-blue-600">Uploading...</span>
+                      <span className="text-xs text-blue-600 font-medium">Uploading image...</span>
                     )}
                   </div>
                 </div>

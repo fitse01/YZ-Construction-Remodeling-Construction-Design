@@ -71,9 +71,9 @@ app.use(cors({
 // Preflight options handling
 app.options('*', cors() as any);
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing middleware (support large JSON and media payloads up to 2GB)
+app.use(express.json({ limit: '2gb' }));
+app.use(express.urlencoded({ extended: true, limit: '2gb' }));
 app.use(cookieParser());
 
 // Serve uploaded files statically

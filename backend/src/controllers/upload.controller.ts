@@ -1,11 +1,17 @@
-import { NextFunction, Response } from 'express';
+import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { uploadImages, uploadVideos } from '../middleware/upload';
 
 export const uploadProjectImages = async (req: AuthRequest, res: Response) => {
   uploadImages.array('files')(req, res, (err: any) => {
     if (err) {
-      return res.status(400).json({ error: err.message });
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({
+          error: 'Image file is too large. Maximum allowed size is 2GB.',
+          code: 'LIMIT_FILE_SIZE',
+        });
+      }
+      return res.status(400).json({ error: err.message || 'Failed to upload images' });
     }
 
     if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
@@ -21,7 +27,7 @@ export const uploadProjectImages = async (req: AuthRequest, res: Response) => {
       mimeType: file.mimetype,
       size: file.size,
       path: file.path,
-      url: `/uploads/projects/${req.params.projectId}/images/${file.filename}`,
+      url: `/uploads/projects/${file.filename}`,
     }));
 
     res.json({ files: uploadedFiles });
@@ -31,7 +37,13 @@ export const uploadProjectImages = async (req: AuthRequest, res: Response) => {
 export const uploadProjectVideos = async (req: AuthRequest, res: Response) => {
   uploadVideos.array('files')(req, res, (err: any) => {
     if (err) {
-      return res.status(400).json({ error: err.message });
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({
+          error: 'Video file is too large. Maximum allowed size is 2GB.',
+          code: 'LIMIT_FILE_SIZE',
+        });
+      }
+      return res.status(400).json({ error: err.message || 'Failed to upload videos' });
     }
 
     if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
@@ -46,7 +58,7 @@ export const uploadProjectVideos = async (req: AuthRequest, res: Response) => {
       mimeType: file.mimetype,
       size: file.size,
       path: file.path,
-      url: `/uploads/projects/${req.params.projectId}/videos/${file.filename}`,
+      url: `/uploads/videos/${file.filename}`,
     }));
 
     res.json({ files: uploadedFiles });

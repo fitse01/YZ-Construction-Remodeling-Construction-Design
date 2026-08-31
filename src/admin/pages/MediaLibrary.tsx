@@ -1,121 +1,152 @@
-import { useState, useEffect, useRef } from 'react'
-import Sidebar from '../components/Sidebar'
-import { Image, Video, Upload, Search, Trash2, Copy, Check, Folder } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import Sidebar from '../components/Sidebar';
+import { Image, Video, Upload, Search, Trash2, Copy, Check, Folder, ImageIcon } from 'lucide-react';
+import { API_BASE } from '@/lib/api';
 
 interface MediaItem {
-  id: string
-  folder: string
-  type: string
-  filename: string
-  originalName: string
-  mimeType: string
-  size: number
-  url: string
-  thumbnailUrl?: string
-  createdAt: string
+  id: string;
+  folder: string;
+  type: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  url: string;
+  thumbnailUrl?: string;
+  createdAt: string;
 }
 
 export default function MediaLibrary({ initialType = 'all' }: { initialType?: string }) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [mediaList, setMediaList] = useState<MediaItem[]>([])
-  const [activeFolder, setActiveFolder] = useState('all')
-  const [activeType, setActiveType] = useState(initialType)
-  const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [mediaList, setMediaList] = useState<MediaItem[]>([]);
+  const [activeFolder, setActiveFolder] = useState('all');
+  const [activeType, setActiveType] = useState(initialType);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [dragActive, setDragActive] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const folders = [
     { id: 'all', label: 'All Media' },
     { id: 'projects', label: 'Projects' },
     { id: 'services', label: 'Services' },
+    { id: 'about', label: 'About' },
+    { id: 'journal', label: 'Journal' },
     { id: 'hero', label: 'Hero' },
     { id: 'gallery', label: 'Gallery' },
     { id: 'testimonials', label: 'Testimonials' },
-    { id: 'logo', label: 'Logos' },
     { id: 'videos', label: 'Videos' },
     { id: 'documents', label: 'Documents' },
-  ]
+  ];
 
   useEffect(() => {
-    fetchMedia()
-  }, [activeFolder, activeType, search])
+    fetchMedia();
+  }, [activeFolder, activeType, search]);
 
   const fetchMedia = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      if (activeFolder !== 'all') params.append('folder', activeFolder)
-      if (activeType !== 'all') params.append('type', activeType)
-      if (search) params.append('search', search)
+      const params = new URLSearchParams();
+      if (activeFolder !== 'all') params.append('folder', activeFolder);
+      if (activeType !== 'all') params.append('type', activeType);
+      if (search) params.append('search', search);
 
-      const res = await fetch(`/api/media?${params.toString()}`, {
-        credentials: 'include',
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setMediaList(data.media || [])
-      }
+      const res = await axios.get(`${API_BASE}/api/media?${params.toString()}`, {
+        withCredentials: true,
+      });
+      setMediaList(res.data.media || []);
     } catch (err) {
-      console.error('Failed to fetch media:', err)
+      console.error('Failed to fetch media:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
+  const uploadFiles = async (files: File[]) => {
+    if (files.length === 0) return;
 
-    setUploading(true)
-    const targetFolder = activeFolder === 'all' ? 'gallery' : activeFolder
+    setUploading(true);
+    setUploadProgress(0);
+    const targetFolder = activeFolder === 'all' ? 'gallery' : activeFolder;
+    let failedCount = 0;
 
     for (let i = 0; i < files.length; i++) {
-      const formData = new FormData()
-      formData.append('file', files[i])
+      const file = files[i];
+      const formData = new FormData();
+      formData.append('file', file);
 
       try {
-        await fetch(`/api/media/upload/${targetFolder}`, {
-          method: 'POST',
-          credentials: 'include',
-          body: formData,
-        })
-      } catch (err) {
-        console.error('Upload failed for file:', files[i].name, err)
+        await axios.post(`${API_BASE}/api/media/upload/${targetFolder}`, formData, {
+          withCredentials: true,
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const current = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              const base = (i / files.length) * 100;
+              const step = current / files.length;
+              setUploadProgress(Math.min(100, Math.round(base + step)));
+            }
+          },
+        });
+      } catch (err: any) {
+        failedCount++;
+        console.error('Upload failed for file:', file.name, err);
+        const errMsg = err.response?.status === 413
+          ? `File "${file.name}" is too large (413). Max allowed size is 2GB.`
+          : (err.response?.data?.error || err.message);
+        alert(`Failed to upload ${file.name}: ${errMsg}`);
       }
     }
 
-    e.target.value = ''
-    setUploading(false)
-    fetchMedia()
-  }
+    setUploading(false);
+    setUploadProgress(0);
+    fetchMedia();
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      uploadFiles(filesArray);
+    }
+    e.target.value = '';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const filesArray = Array.from(e.dataTransfer.files);
+      uploadFiles(filesArray);
+    }
+  };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this media file?')) return
+    if (!window.confirm('Are you sure you want to delete this media file?')) return;
     try {
-      const res = await fetch(`/api/media/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-      if (res.ok) {
-        setMediaList(prev => prev.filter(m => m.id !== id))
-      }
+      await axios.delete(`${API_BASE}/api/media/${id}`, {
+        withCredentials: true,
+      });
+      setMediaList((prev) => prev.filter((m) => m.id !== id));
     } catch (err) {
-      console.error('Failed to delete media:', err)
+      console.error('Failed to delete media:', err);
+      alert('Failed to delete media file');
     }
-  }
+  };
 
   const copyToClipboard = (url: string, id: string) => {
-    navigator.clipboard.writeText(url)
-    setCopiedId(id)
-    setTimeout(() => setCopiedId(null), 2000)
-  }
+    const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+    navigator.clipboard.writeText(fullUrl);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
       <div className="flex-1 p-4 md:p-8 pt-20 md:pt-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Media Library</h1>
             <p className="text-gray-600 mt-1">Upload, search, filter, and reuse media files across your website</p>
@@ -127,22 +158,53 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
             className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-lg cursor-pointer transition font-medium text-sm shadow w-full sm:w-auto"
           >
             <Upload size={18} />
-            <span>{uploading ? 'Uploading...' : 'Upload Media'}</span>
+            <span>{uploading ? `Uploading (${uploadProgress}%)...` : 'Upload Media'}</span>
           </button>
           <input
             ref={fileInputRef}
             type="file"
             multiple
+            accept="image/*,video/*,application/pdf"
             style={{ display: 'none' }}
             onChange={handleFileUpload}
             disabled={uploading}
           />
         </div>
 
+        {/* Drag and Drop Zone */}
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragActive(true);
+          }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={`mb-6 rounded-xl border-2 border-dashed p-6 text-center transition cursor-pointer ${
+            dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'
+          }`}
+        >
+          <ImageIcon className="mx-auto text-gray-400" size={32} />
+          <p className="mt-2 text-sm font-medium text-gray-900">
+            {uploading ? `Uploading files... ${uploadProgress}%` : 'Drag and drop media files here, or click to browse'}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Supports HD images and videos up to 2GB. Uploads into &quot;{folders.find(f => f.id === activeFolder)?.label || 'Gallery'}&quot;.
+          </p>
+          {uploading && (
+            <div className="w-full max-w-md mx-auto mt-3 bg-gray-200 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          )}
+        </div>
+
         {/* Filters and Folders */}
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto">
-            {folders.map(f => (
+            {folders.map((f) => (
               <button
                 key={f.id}
                 onClick={() => setActiveFolder(f.id)}
@@ -165,13 +227,13 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
                 type="text"
                 placeholder="Search file name..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 pr-4 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             </div>
             <select
               value={activeType}
-              onChange={e => setActiveType(e.target.value)}
+              onChange={(e) => setActiveType(e.target.value)}
               className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
             >
               <option value="all">All Types</option>
@@ -192,7 +254,7 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {mediaList.map(item => (
+            {mediaList.map((item) => (
               <div key={item.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden group shadow-sm hover:shadow-md transition">
                 <div className="aspect-square bg-gray-100 relative overflow-hidden flex items-center justify-center">
                   {item.type === 'video' ? (
@@ -219,7 +281,7 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
                   <div className="mt-3 flex items-center justify-between border-t pt-2 text-xs">
                     <button
                       onClick={() => copyToClipboard(item.url, item.id)}
-                      className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition"
+                      className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition cursor-pointer"
                       title="Copy public URL"
                     >
                       {copiedId === item.id ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
@@ -227,7 +289,7 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="text-gray-400 hover:text-red-600 transition"
+                      className="text-gray-400 hover:text-red-600 transition cursor-pointer"
                       title="Delete file"
                     >
                       <Trash2 size={14} />
@@ -240,5 +302,5 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
         )}
       </div>
     </div>
-  )
+  );
 }
