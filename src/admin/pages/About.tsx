@@ -144,6 +144,9 @@ export default function About() {
       formData.append("file", file);
       const response = await axios.post(`${API_BASE}/api/media/upload/about`, formData, {
         withCredentials: true,
+        timeout: 0,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
       });
 
       const uploadedMedia = response.data;
@@ -290,6 +293,9 @@ export default function About() {
       formData.append("file", file);
       const response = await axios.post(`${API_BASE}/api/media/upload/about`, formData, {
         withCredentials: true,
+        timeout: 0,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
       });
 
       const uploadedMedia = response.data;

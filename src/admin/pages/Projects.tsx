@@ -127,6 +127,9 @@ export default function Projects() {
 
     const response = await axios.post(`${API_BASE}/api/media/upload/projects`, formData, {
       withCredentials: true,
+      timeout: 0,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
 
     return response.data as ProjectMedia;
@@ -267,6 +270,9 @@ export default function Projects() {
 
         const response = await axios.post(`${API_BASE}/api/media/upload/projects`, formData, {
           withCredentials: true,
+          timeout: 0,
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
               const current = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -283,9 +289,12 @@ export default function Projects() {
       }
     } catch (err: any) {
       console.error("Failed to upload project media:", err);
-      const msg = err.response?.status === 413
-        ? "Upload failed (413 Payload Too Large): File size exceeds server limit (2GB)."
-        : (err.response?.data?.error || err.message);
+      let msg = err.response?.data?.error || err.message;
+      if (err.response?.status === 413) {
+        msg = "Upload failed (413 Payload Too Large): File size exceeds server limit (2GB).";
+      } else if (err.response?.status === 408) {
+        msg = "Upload failed (408 Request Timeout): Server or proxy timed out reading upload stream. Check Nginx client_body_timeout.";
+      }
       throw new Error(msg);
     } finally {
       setUploadingMedia(false);
@@ -309,11 +318,16 @@ export default function Projects() {
   };
 
   const uploadGeneratedVideoThumbnail = async (projectId: string, videoFile: File) => {
-    const thumbnailFile = await createVideoThumbnailFile(videoFile);
-    if (!thumbnailFile) return null;
+    try {
+      const thumbnailFile = await createVideoThumbnailFile(videoFile);
+      if (!thumbnailFile) return null;
 
-    const thumbnailMedia = await uploadProjectAsset(projectId, thumbnailFile);
-    return thumbnailMedia.url;
+      const thumbnailMedia = await uploadProjectAsset(projectId, thumbnailFile);
+      return thumbnailMedia.url;
+    } catch (err) {
+      console.warn("Could not generate video thumbnail:", err);
+      return null;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

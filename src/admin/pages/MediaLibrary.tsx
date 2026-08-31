@@ -81,6 +81,9 @@ export default function MediaLibrary({ initialType = 'all' }: { initialType?: st
       try {
         await axios.post(`${API_BASE}/api/media/upload/${targetFolder}`, formData, {
           withCredentials: true,
+          timeout: 0,
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
               const current = Math.round((progressEvent.loaded * 100) / progressEvent.total);

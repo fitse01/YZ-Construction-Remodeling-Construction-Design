@@ -102,7 +102,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📁 Uploads directory: ${uploadsDir}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
@@ -112,5 +112,11 @@ app.listen(PORT, () => {
     console.error('SMTP verification error:', err);
   });
 });
+
+// Configure Node.js HTTP Server timeouts for large video & media uploads (0 disables timeout entirely)
+server.timeout = 0; // Disable socket inactivity timeout
+server.requestTimeout = 0; // Disable request reading timeout (prevents 408 Request Timeout)
+server.keepAliveTimeout = 3600000; // 1 hour keepalive
+server.headersTimeout = 3601000; // 1 hour + 1 second (must be higher than keepAliveTimeout)
 
 export default app;

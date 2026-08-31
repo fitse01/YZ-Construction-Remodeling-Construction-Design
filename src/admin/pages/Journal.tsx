@@ -142,6 +142,9 @@ export default function Journal() {
 
       const response = await axios.post(`${API_BASE}/api/media/upload/journal`, formData, {
         withCredentials: true,
+        timeout: 0,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
       });
 
       const uploadedMedia = response.data;

@@ -186,6 +186,9 @@ const Services = () => {
 
         const response = await axios.post(`${API_BASE}/api/media/upload/services`, formData, {
           withCredentials: true,
+          timeout: 0,
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
               const current = Math.round((progressEvent.loaded * 100) / progressEvent.total);
